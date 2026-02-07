@@ -1,10 +1,16 @@
 #include <iostream>
+#include <stdexcept>
 
 #include "pawnWizard.hpp"
 
 pawnWizard::pawnWizard() {}
 
 pawnWizard::~pawnWizard() {}
+
+
+/*
+    === HELPER FUNCTIONS ===
+*/
 
 char pawnWizard::getPieceAtSquare(const int index) {
     /*
@@ -30,6 +36,32 @@ char pawnWizard::getPieceAtSquare(const int index) {
     if (blackKing & mask) return 'k';
 
     return '.'; // Empty square
+}
+
+uint64_t& pawnWizard::getBitboardByType(const char pieceType) {
+    /*
+    Function to get the corresponding bitboard for a type of piece.
+    :param pieceType: The type of piece represented by a char. Lowercase for black, uppercase for white.
+    :return: The 64-bit bitboard representation of the pieces' of pieceType placement.
+    */
+
+    if (pieceType == 'p') return blackPawns;
+    else if (pieceType == 'r') return blackRooks;
+    else if (pieceType == 'n') return blackKnights;
+    else if (pieceType == 'b') return blackBishops;
+    else if (pieceType == 'q') return blackQueens;
+    else if (pieceType == 'k') return blackKing;
+    else if (pieceType == 'P') return whitePawns;
+    else if (pieceType == 'R') return whiteRooks;
+    else if (pieceType == 'N') return whiteKnights;
+    else if (pieceType == 'B') return whiteBishops;
+    else if (pieceType == 'Q') return whiteQueens;
+    else if (pieceType == 'K') return whiteKing;
+    else {
+        throw std::invalid_argument("Not a valid pieceType.");
+        return nullptr;
+    }
+
 }
 
 void pawnWizard::printBoard() {
@@ -75,5 +107,75 @@ int pawnWizard::uci2index(const char* uci) {
     char file = uci[0];
     char row = uci[1] - '0';
 
-    return 8 * (row - 1) + (file - 'a');
+    int bitIndex = 8 * (row - 1) + (file - 'a');
+    
+    return bitIndex;
+}
+
+void pawnWizard::movePieceByType(char pieceType, int fromIndex, int toIndex) {
+    /*
+    Function that moves a piece from one square to another
+    :param pieceType: The type of piece to move represented by a char. Lowercase is black, uppercase is white.
+    :param fromIndex: The bit indexed (0-63) square to move from.
+    :param toIndex: The bit indexed (0-63) square to move to.
+    */
+
+    char pieceAtToSquare = getPieceAtSquare(toIndex);
+    uint64_t &bitboard = getBitboardByType(pieceType);
+
+    if ((whiteToMove && isupper(pieceAtToSquare)) || (!whiteToMove && islower(pieceAtToSquare))) {
+        throw std::invalid_argument("toIndex occupied by friendly piece.");
+        std::cout << "Error" << std::endl;
+        return;
+    }
+
+    // Remove the piece occupying the toIndex square.
+    if (pieceAtToSquare == 'p'){
+        blackPawns &= ~(1ULL << toIndex);
+    } else if (pieceAtToSquare == 'n'){
+        blackKnights &= ~(1ULL << toIndex);
+    } else if (pieceAtToSquare == 'b'){
+        blackBishops &= ~(1ULL << toIndex);
+    } else if (pieceAtToSquare == 'r'){
+        blackRooks &= ~(1ULL << toIndex);
+    } else if (pieceAtToSquare == 'q'){
+        blackQueens &= ~(1ULL << toIndex);
+    } else if (pieceAtToSquare == 'k'){
+        blackKing &= ~(1ULL << toIndex);
+    } else if (pieceAtToSquare == 'P'){
+        whitePawns &= ~(1ULL << toIndex);
+    } else if (pieceAtToSquare == 'N'){
+        whiteKnights &= ~(1ULL << toIndex);
+    } else if (pieceAtToSquare == 'B'){
+        whiteBishops &= ~(1ULL << toIndex);
+    } else if (pieceAtToSquare == 'R'){
+        whiteRooks &= ~(1ULL << toIndex);
+    } else if (pieceAtToSquare == 'Q'){
+        whiteQueens &= ~(1ULL << toIndex);
+    } else if (pieceAtToSquare == 'K'){
+        whiteKing &= ~(1ULL << toIndex);
+    }
+
+    bitboard &= ~(1ULL << fromIndex); // Remove piece from "from" square
+    bitboard |= (1ULL << toIndex);    // Place piece on "to" square
+    whiteToMove = !whiteToMove;
+    
+}
+
+void pawnWizard::movePiece(int fromIndex, int toIndex) {
+    /*
+    Function that automatically moves the piece on the from square to the to square.
+    :param fromIndex: The bit indexed (0-63) square to move from.
+    :param toIndex: The bit indexed (0-63) square to move to.
+    */
+
+    char pieceType = getPieceAtSquare(fromIndex);
+    std::cout << pieceType << std::endl;
+
+    if (pieceType == '.') {
+        throw std::invalid_argument("Invalid fromIndex. No piece on that square.");
+        return;
+    }
+
+    movePieceByType(pieceType, fromIndex, toIndex);
 }

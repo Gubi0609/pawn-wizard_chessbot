@@ -6,14 +6,16 @@ class pawnWizard {
 
 public:
     pawnWizard();
+    ~pawnWizard();
 
     // Helper functions
     char getPieceAtSquare(const int index);
+    uint64_t* getBitboardByType(const char pieceType);
     void printBoard();
     void printSingleBitBoard(uint64_t &board);
     int uci2index(const char* uci);
-
-    ~pawnWizard();
+    void movePieceByType(char pieceType, int fromIndex, int toIndex);
+    void movePiece(int fromIndex, int toIndex);
 
 protected:
     uint64_t whitePawns = 0x000000000000FF00;
