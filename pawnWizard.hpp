@@ -7,10 +7,11 @@ class pawnWizard {
 public:
     pawnWizard();
 
-    // Testing functions
-    char getPieceAtSquare(const int bitSquare);
+    // Helper functions
+    char getPieceAtSquare(const int index);
     void printBoard();
     void printSingleBitBoard(uint64_t &board);
+    int uci2index(const char* uci);
 
     ~pawnWizard();
 
