@@ -25,7 +25,7 @@ protected:
     uint64_t blackPawns = 0x00FF000000000000;
     uint64_t blackRooks = 0x8100000000000000;
     uint64_t blackKnights = 0x4200000000000000;
-    uint64_t blackBishops = 0x24000000000000;
+    uint64_t blackBishops = 0x2400000000000000;
     uint64_t blackKing = 0x0800000000000000;
     uint64_t blackQueens = 0x1000000000000000;
 
