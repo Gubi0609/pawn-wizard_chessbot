@@ -254,8 +254,8 @@ unsigned long int pawnWizard::knightMovePseudoLegal(int fromIndex) {
     if ((startPos & ~(hFile)) != 0 && (startPos & ~(row2)) != 0 && (startPos & ~(row1)) != 0) attacks |= startPos >> 15; // Move 2 down and 1 right
     if ((startPos & ~(hFile)) != 0 && (startPos & ~(gFile)) != 0 && (startPos & ~(row1)) != 0) attacks |= startPos >> 6; // Move 1 down and 2 right
 
-    if ((startPos & whiteKnights) != 0) attacks & ~(whitePieces); // Remove friendly pieces from attack options
-    else if ((startPos & blackKnights) != 0) attacks & ~(blackPieces); // Remove friendly pieces from attack options
+    if ((startPos & whiteKnights) != 0) attacks &= ~(whitePieces); // Remove friendly pieces from attack options
+    else if ((startPos & blackKnights) != 0) attacks &= ~(blackPieces); // Remove friendly pieces from attack options
 
     return attacks;
 
