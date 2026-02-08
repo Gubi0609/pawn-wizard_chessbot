@@ -80,7 +80,7 @@ void pawnWizard::printBoard() {
     std::cout << "   a b c d e f g h\n";
 }
 
-void pawnWizard::printSingleBitBoard(unsigned long int &board) {
+void pawnWizard::printSingleBitBoard(const unsigned long int &board) {
     /*
     Helper function to print a single piece-board to terminal.
     */
@@ -110,7 +110,7 @@ int pawnWizard::uci2index(const char* uci) {
     return bitIndex;
 }
 
-void pawnWizard::movePieceByType(char pieceType, int fromIndex, int toIndex) {
+void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, const int toIndex) {
     /*
     Function that moves a piece from one square to another
     :param pieceType: The type of piece to move represented by a char. Lowercase is black, uppercase is white.
@@ -166,7 +166,7 @@ void pawnWizard::movePieceByType(char pieceType, int fromIndex, int toIndex) {
     
 }
 
-void pawnWizard::movePiece(int fromIndex, int toIndex) {
+void pawnWizard::movePiece(const int fromIndex, const int toIndex) {
     /*
     Function that automatically moves the piece on the from square to the to square.
     :param fromIndex: The bit indexed (0-63) square to move from.
@@ -186,7 +186,7 @@ void pawnWizard::movePiece(int fromIndex, int toIndex) {
     === LEGAL MOVE FUNCTIONS ===
 */
 
-unsigned long int pawnWizard::pawnMovePseudoLegal(int fromIndex) {
+unsigned long int pawnWizard::pawnMovePseudoLegal(const int fromIndex) {
     /*
     Generates all possible psuedo legal moves for a pawn at position fromIndex.
     :param fromIndex: The bit indexed (0-63) square to move from.
@@ -230,7 +230,7 @@ unsigned long int pawnWizard::pawnMovePseudoLegal(int fromIndex) {
     return moves;
 }
 
-unsigned long int pawnWizard::knightMovePseudoLegal(int fromIndex) {
+unsigned long int pawnWizard::knightMovePseudoLegal(const int fromIndex) {
     /*
     Generates all possible pseudo legal moves for a knight at position fromIndex.
     :param fromIndex: The bit indexed (0-63) square to move from.
