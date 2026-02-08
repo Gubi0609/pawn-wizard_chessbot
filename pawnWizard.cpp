@@ -118,9 +118,8 @@ void pawnWizard::movePieceByType(char pieceType, int fromIndex, int toIndex) {
     :param toIndex: The bit indexed (0-63) square to move to.
     */
 
-    //char pieceAtFromSquare = getPieceAtSquare(fromIndex);
     char pieceAtToSquare = getPieceAtSquare(toIndex);
-    unsigned long int &bitboard = getBitboardByType(pieceType);
+    unsigned long int& bitboard = getBitboardByType(pieceType);
 
     if ((!whiteToMove && (((1ULL << fromIndex) & whitePieces) != 0)) || (whiteToMove && (((1ULL << fromIndex) & blackPieces) != 0))) {
         throw std::invalid_argument("fromIndex occupied by enemy piece.");
@@ -159,10 +158,10 @@ void pawnWizard::movePieceByType(char pieceType, int fromIndex, int toIndex) {
     bitboard &= ~(1ULL << fromIndex); // Remove piece from "from" square
     bitboard |= (1ULL << toIndex);    // Place piece on "to" square
     
-    // Update the color bitboard to match new placements.
+    // Update the color bitboards to match newest placements.
     whitePieces = whitePawns | whiteRooks | whiteKnights | whiteBishops | whiteKing | whiteQueens;
     blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
-    
+
     whiteToMove = !whiteToMove;
     
 }
@@ -181,4 +180,48 @@ void pawnWizard::movePiece(int fromIndex, int toIndex) {
     }
 
     movePieceByType(pieceType, fromIndex, toIndex);
+}
+
+/*
+    === LEGAL MOVE FUNCTIONS ===
+*/
+
+bool pawnWizard::pawnMovePseudoLegal(int fromIndex, int toIndex) {
+    /*
+    Function to check if a pawn move is pseudo legal.
+    :param fromIndex: The bit indexed (0-63) square to move from.
+    :param toIndex: The bit indexed (0-63) square to move to.
+    :return: True/False depending on the moves legality.
+    */
+
+    // TODO: En pasant
+
+    if ((!whiteToMove && (((1ULL << fromIndex) & whitePieces) != 0)) || (whiteToMove && (((1ULL << fromIndex) & blackPieces) != 0))) {
+        throw std::invalid_argument("fromIndex occupied by enemy piece.");
+    }
+    if ((whiteToMove && (((1ULL << toIndex) & whitePieces) != 0)) || (!whiteToMove && (((1ULL << toIndex) & blackPieces) != 0))) {
+        throw std::invalid_argument("toIndex occupied by friendly piece.");
+    }
+    if ((!whiteToMove && (((1ULL << fromIndex) & whitePawns) != 0)) || (whiteToMove && (((1ULL << fromIndex) & blackPawns) != 0))) {
+        throw std::invalid_argument("fromIndex not occupied by pawn.");
+    }
+
+    unsigned long int pushFile = 0;
+    unsigned long int doublePushFile = 0;
+    unsigned long int attackWest = 0;
+    unsigned long int attackEast = 0;
+
+    if (whiteToMove) {
+        pushFile = (1ULL << fromIndex) << 8;
+        if (((1ULL << fromIndex) & (0x000000000000FF00)) != 0) doublePushFile = (1ULL << fromIndex) << 16;
+        if (((1ULL << fromIndex) & ~(aFile)) != 0 && ((1ULL << toIndex) & blackPieces) != 0) attackWest = (1ULL << fromIndex) << 7;
+        if (((1ULL << fromIndex) & ~(hFile)) != 0 && ((1ULL << toIndex) & blackPieces) != 0) attackEast = (1ULL << fromIndex) << 9;
+    } else {
+        pushFile = (1ULL << fromIndex) >> 8;
+        if (((1ULL << fromIndex) & (0x00FF000000000000)) != 0) doublePushFile = (1ULL << fromIndex) >> 16;
+        if (((1ULL << fromIndex) & ~(aFile)) != 0 && ((1ULL << toIndex) & whitePieces) != 0) attackWest = (1ULL << fromIndex) >> 9;
+        if (((1ULL << fromIndex) & ~(hFile)) != 0 && ((1ULL << toIndex) & whitePieces) != 0) attackEast = (1ULL << fromIndex) >> 7;
+    }
+
+    return ((pushFile | doublePushFile | attackWest | attackEast) & (1ULL << toIndex)) != 0;
 }
