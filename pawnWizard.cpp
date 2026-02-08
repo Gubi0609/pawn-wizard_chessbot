@@ -212,15 +212,24 @@ bool pawnWizard::pawnMovePseudoLegal(int fromIndex, int toIndex) {
     unsigned long int attackEast = 0;
 
     if (whiteToMove) {
-        pushFile = (1ULL << fromIndex) << 8;
-        if (((1ULL << fromIndex) & (0x000000000000FF00)) != 0) doublePushFile = (1ULL << fromIndex) << 16;
-        if (((1ULL << fromIndex) & ~(aFile)) != 0 && ((1ULL << toIndex) & blackPieces) != 0) attackWest = (1ULL << fromIndex) << 7;
-        if (((1ULL << fromIndex) & ~(hFile)) != 0 && ((1ULL << toIndex) & blackPieces) != 0) attackEast = (1ULL << fromIndex) << 9;
+        if ((((1ULL << fromIndex) << 8) & blackPieces) != 0) pushFile = (1ULL << fromIndex) << 8; // Can't push forward into enemy
+        
+        if (((1ULL << fromIndex) & (0x000000000000FF00)) != 0 && 
+            ((((1ULL << fromIndex) << 16) & whitePieces) != 0)) doublePushFile = (1ULL << fromIndex) << 16; // Double push if first move
+        
+        if (((1ULL << fromIndex) & ~(aFile)) != 0 && ((1ULL << toIndex) & blackPieces) != 0) attackWest = (1ULL << fromIndex) << 7; // Attack West if not on a file
+    
+        if (((1ULL << fromIndex) & ~(hFile)) != 0 && ((1ULL << toIndex) & blackPieces) != 0) attackEast = (1ULL << fromIndex) << 9; // Attack East if not on h file
+    
     } else {
-        pushFile = (1ULL << fromIndex) >> 8;
-        if (((1ULL << fromIndex) & (0x00FF000000000000)) != 0) doublePushFile = (1ULL << fromIndex) >> 16;
-        if (((1ULL << fromIndex) & ~(aFile)) != 0 && ((1ULL << toIndex) & whitePieces) != 0) attackWest = (1ULL << fromIndex) >> 9;
-        if (((1ULL << fromIndex) & ~(hFile)) != 0 && ((1ULL << toIndex) & whitePieces) != 0) attackEast = (1ULL << fromIndex) >> 7;
+        if ((((1ULL << fromIndex) >> 8) & whitePieces) != 0) pushFile = (1ULL << fromIndex) >> 8; // Can't push forward into enemy
+        
+        if (((1ULL << fromIndex) & (0x00FF000000000000)) != 0 && 
+            ((((1ULL << fromIndex) >> 16) & whitePieces) != 0)) doublePushFile = (1ULL << fromIndex) >> 16; // Double push if first move
+        
+        if (((1ULL << fromIndex) & ~(aFile)) != 0 && ((1ULL << toIndex) & whitePieces) != 0) attackWest = (1ULL << fromIndex) >> 9; // Attack West if not on a file
+        
+        if (((1ULL << fromIndex) & ~(hFile)) != 0 && ((1ULL << toIndex) & whitePieces) != 0) attackEast = (1ULL << fromIndex) >> 7; // Attack East if not on h file
     }
 
     return ((pushFile | doublePushFile | attackWest | attackEast) & (1ULL << toIndex)) != 0;
