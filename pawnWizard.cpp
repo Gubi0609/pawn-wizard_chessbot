@@ -186,12 +186,11 @@ void pawnWizard::movePiece(int fromIndex, int toIndex) {
     === LEGAL MOVE FUNCTIONS ===
 */
 
-bool pawnWizard::pawnMovePseudoLegal(int fromIndex, int toIndex) {
+unsigned long int pawnWizard::pawnMovePseudoLegal(int fromIndex) {
     /*
-    Function to check if a pawn move is pseudo legal.
+    Generates all possible psuedo legal moves for a pawn at position fromIndex.
     :param fromIndex: The bit indexed (0-63) square to move from.
-    :param toIndex: The bit indexed (0-63) square to move to.
-    :return: True/False depending on the moves legality.
+    :return: unsigned long int with a binary value corresponding to the moveable squares.
     */
 
     // TODO: 
@@ -202,55 +201,47 @@ bool pawnWizard::pawnMovePseudoLegal(int fromIndex, int toIndex) {
 
     unsigned long int startPos = 1ULL << fromIndex;
 
-
-    if ((!whiteToMove && ((startPos & whitePieces) != 0)) || (whiteToMove && ((startPos & blackPieces) != 0))) {
-        throw std::invalid_argument("fromIndex occupied by enemy piece.");
-    }
-    if ((whiteToMove && (((1ULL << toIndex) & whitePieces) != 0)) || (!whiteToMove && (((1ULL << toIndex) & blackPieces) != 0))) {
-        throw std::invalid_argument("toIndex occupied by friendly piece.");
-    }
-    if ((startPos & (whitePawns | blackPawns)) != 0) {
+    if ((startPos & ~(whitePawns | blackPawns)) != 0) {
         throw std::invalid_argument("fromIndex not occupied by pawn.");
     }
 
-    unsigned long int pushFile = 0;
-    unsigned long int doublePushFile = 0;
-    unsigned long int attackWest = 0;
-    unsigned long int attackEast = 0;
+    unsigned long int moves = 0;
 
-    if (whiteToMove) {
-        if (((startPos << 8) & (whitePieces | blackPieces)) != 0) pushFile = startPos << 8; // Can't push forward into other piece
+    if ((startPos & whitePawns) != 0) {
+        if (((startPos << 8) & (whitePieces | blackPieces)) != 0) moves |= startPos << 8; // Can't push forward into other piece
         
         if ((startPos & (row2)) != 0 && 
-            (((startPos << 16) & (whitePieces | blackPieces)) != 0)) doublePushFile = startPos << 16; // Double push if first move
+            (((startPos << 16) & (whitePieces | blackPieces)) != 0)) moves |= startPos << 16; // Double push if first move
         
-        if ((startPos & ~(aFile)) != 0 && ((1ULL << toIndex) & blackPieces) != 0) attackWest = startPos << 7; // Attack West if not on a file
+        if ((startPos & ~(aFile)) != 0 && ((startPos << 7) & blackPieces) != 0) moves |= startPos << 7; // Attack West if not on a file
     
-        if ((startPos & ~(hFile)) != 0 && ((1ULL << toIndex) & blackPieces) != 0) attackEast = startPos << 9; // Attack East if not on h file
+        if ((startPos & ~(hFile)) != 0 && ((startPos << 9) & blackPieces) != 0) moves |= startPos << 9; // Attack East if not on h file
     
-    } else {
-        if (((startPos >> 8) & (whitePieces | blackPieces)) != 0) pushFile = startPos >> 8; // Can't push forward into other piece
+    } else if ((startPos & blackPawns) != 0) {
+        if (((startPos >> 8) & (whitePieces | blackPieces)) != 0) moves |= startPos >> 8; // Can't push forward into other piece
         
         if ((startPos & (row7)) != 0 && 
-            (((startPos >> 16) & (whitePieces | blackPieces)) != 0)) doublePushFile = startPos >> 16; // Double push if first move
+            (((startPos >> 16) & (whitePieces | blackPieces)) != 0)) moves |= startPos >> 16; // Double push if first move
         
-        if ((startPos & ~(aFile)) != 0 && ((1ULL << toIndex) & whitePieces) != 0) attackWest = startPos >> 9; // Attack West if not on a file
+        if ((startPos & ~(aFile)) != 0 && ((startPos >> 9) & whitePieces) != 0) moves |= startPos >> 9; // Attack West if not on a file
         
-        if ((startPos & ~(hFile)) != 0 && ((1ULL << toIndex) & whitePieces) != 0) attackEast = startPos >> 7; // Attack East if not on h file
+        if ((startPos & ~(hFile)) != 0 && ((startPos >> 7) & whitePieces) != 0) moves |= startPos >> 7; // Attack East if not on h file
     }
 
-    return ((pushFile | doublePushFile | attackWest | attackEast) & (1ULL << toIndex)) != 0;
+    return moves;
 }
 
 unsigned long int pawnWizard::knightMovePseudoLegal(int fromIndex) {
     /*
     Generates all possible pseudo legal moves for a knight at position fromIndex.
     :param fromIndex: The bit indexed (0-63) square to move from.
-    :param toIndex: The bit indexed (0-63) square to move to.
-    :return: True/False depending on the moves legality.
+    :return: unsigned long int with a binary value corresponding to the moveable squares.
     */
 
     unsigned long int startPos = 1ULL << fromIndex;
+
+    if ((startPos & ~(whiteKnights | blackKnights)) != 0) throw std::invalid_argument("fromIndex not occupied by knight.");
+
     unsigned long int attacks = 0; // Will store possible attacks.
 
 
@@ -263,9 +254,8 @@ unsigned long int pawnWizard::knightMovePseudoLegal(int fromIndex) {
     if ((startPos & ~(hFile)) != 0 && (startPos & ~(row2)) != 0 && (startPos & ~(row1)) != 0) attacks |= startPos >> 15; // Move 2 down and 1 right
     if ((startPos & ~(hFile)) != 0 && (startPos & ~(gFile)) != 0 && (startPos & ~(row1)) != 0) attacks |= startPos >> 6; // Move 1 down and 2 right
 
-    if (startPos & whiteKnights) attacks & ~(whitePieces); // Remove friendly pieces from attack options
-    if (startPos & blackKnights) attacks & ~(blackPieces); // Remove friendly pieces from attack options
-    else throw std::invalid_argument("fromIndex not occupied by knight."); // Should probably be moved to start of function but whatever
+    if ((startPos & whiteKnights) != 0) attacks & ~(whitePieces); // Remove friendly pieces from attack options
+    else if ((startPos & blackKnights) != 0) attacks & ~(blackPieces); // Remove friendly pieces from attack options
 
     return attacks;
 

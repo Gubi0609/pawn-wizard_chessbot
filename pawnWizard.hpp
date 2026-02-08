@@ -14,7 +14,7 @@ public:
     void movePiece(int fromIndex, int toIndex);
 
     // Legal move functions
-    bool pawnMovePseudoLegal(int fromIndex, int toIndex);
+    unsigned long int pawnMovePseudoLegal(int fromIndex);
     unsigned long int knightMovePseudoLegal(int fromIndex);
 
 protected:
