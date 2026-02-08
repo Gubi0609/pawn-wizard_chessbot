@@ -208,20 +208,20 @@ unsigned long int pawnWizard::pawnMovePseudoLegal(int fromIndex) {
     unsigned long int moves = 0;
 
     if ((startPos & whitePawns) != 0) {
-        if (((startPos << 8) & (whitePieces | blackPieces)) != 0) moves |= startPos << 8; // Can't push forward into other piece
+        if (((startPos << 8) & ~(whitePieces | blackPieces)) != 0) moves |= startPos << 8; // Can't push forward into other piece
         
         if ((startPos & (row2)) != 0 && 
-            (((startPos << 16) & (whitePieces | blackPieces)) != 0)) moves |= startPos << 16; // Double push if first move
+            (((startPos << 16) & ~(whitePieces | blackPieces)) != 0)) moves |= startPos << 16; // Double push if first move
         
         if ((startPos & ~(aFile)) != 0 && ((startPos << 7) & blackPieces) != 0) moves |= startPos << 7; // Attack West if not on a file
     
         if ((startPos & ~(hFile)) != 0 && ((startPos << 9) & blackPieces) != 0) moves |= startPos << 9; // Attack East if not on h file
     
     } else if ((startPos & blackPawns) != 0) {
-        if (((startPos >> 8) & (whitePieces | blackPieces)) != 0) moves |= startPos >> 8; // Can't push forward into other piece
+        if (((startPos >> 8) & ~(whitePieces | blackPieces)) != 0) moves |= startPos >> 8; // Can't push forward into other piece
         
         if ((startPos & (row7)) != 0 && 
-            (((startPos >> 16) & (whitePieces | blackPieces)) != 0)) moves |= startPos >> 16; // Double push if first move
+            (((startPos >> 16) & ~(whitePieces | blackPieces)) != 0)) moves |= startPos >> 16; // Double push if first move
         
         if ((startPos & ~(aFile)) != 0 && ((startPos >> 9) & whitePieces) != 0) moves |= startPos >> 9; // Attack West if not on a file
         
