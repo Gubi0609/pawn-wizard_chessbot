@@ -15,6 +15,7 @@ public:
 
     // Legal move functions
     bool pawnMovePseudoLegal(int fromIndex, int toIndex);
+    unsigned long int knightMovePseudoLegal(int fromIndex);
 
 protected:
     unsigned long int whitePawns = 0x000000000000FF00;
@@ -34,7 +35,22 @@ protected:
     unsigned long int blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
 
     unsigned long int aFile = 0x0101010101010101;
+    unsigned long int bFile = 0x0202020202020202;
+    unsigned long int cFile = 0x0404040404040404;
+    unsigned long int dFile = 0x0808080808080808;
+    unsigned long int eFile = 0x1010101010101010;
+    unsigned long int fFile = 0x2020202020202020;
+    unsigned long int gFile = 0x4040404040404040;
     unsigned long int hFile = 0x8080808080808080;
+
+    unsigned long int row1 = 0x00000000000000FF;
+    unsigned long int row2 = 0x000000000000FF00;
+    unsigned long int row3 = 0x0000000000FF0000;
+    unsigned long int row4 = 0x00000000FF000000;
+    unsigned long int row5 = 0x000000FF00000000;
+    unsigned long int row6 = 0x0000FF0000000000;
+    unsigned long int row7 = 0x00FF000000000000;
+    unsigned long int row8 = 0xFF00000000000000;
 
     bool whiteToMove = true;
     

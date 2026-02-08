@@ -194,15 +194,22 @@ bool pawnWizard::pawnMovePseudoLegal(int fromIndex, int toIndex) {
     :return: True/False depending on the moves legality.
     */
 
-    // TODO: En pasant
+    // TODO: 
+    // - En pasant
+    // - Promotion
+    // - Change return type to unsigned long int and remove toIndex from function
 
-    if ((!whiteToMove && (((1ULL << fromIndex) & whitePieces) != 0)) || (whiteToMove && (((1ULL << fromIndex) & blackPieces) != 0))) {
+
+    unsigned long int startPos = 1ULL << fromIndex;
+
+
+    if ((!whiteToMove && ((startPos & whitePieces) != 0)) || (whiteToMove && ((startPos & blackPieces) != 0))) {
         throw std::invalid_argument("fromIndex occupied by enemy piece.");
     }
     if ((whiteToMove && (((1ULL << toIndex) & whitePieces) != 0)) || (!whiteToMove && (((1ULL << toIndex) & blackPieces) != 0))) {
         throw std::invalid_argument("toIndex occupied by friendly piece.");
     }
-    if ((!whiteToMove && (((1ULL << fromIndex) & whitePawns) != 0)) || (whiteToMove && (((1ULL << fromIndex) & blackPawns) != 0))) {
+    if ((startPos & (whitePawns | blackPawns)) != 0) {
         throw std::invalid_argument("fromIndex not occupied by pawn.");
     }
 
@@ -212,25 +219,54 @@ bool pawnWizard::pawnMovePseudoLegal(int fromIndex, int toIndex) {
     unsigned long int attackEast = 0;
 
     if (whiteToMove) {
-        if ((((1ULL << fromIndex) << 8) & (whitePieces | blackPieces)) != 0) pushFile = (1ULL << fromIndex) << 8; // Can't push forward into other piece
+        if (((startPos << 8) & (whitePieces | blackPieces)) != 0) pushFile = startPos << 8; // Can't push forward into other piece
         
-        if (((1ULL << fromIndex) & (0x000000000000FF00)) != 0 && 
-            ((((1ULL << fromIndex) << 16) & (whitePieces | blackPieces)) != 0)) doublePushFile = (1ULL << fromIndex) << 16; // Double push if first move
+        if ((startPos & (row2)) != 0 && 
+            (((startPos << 16) & (whitePieces | blackPieces)) != 0)) doublePushFile = startPos << 16; // Double push if first move
         
-        if (((1ULL << fromIndex) & ~(aFile)) != 0 && ((1ULL << toIndex) & blackPieces) != 0) attackWest = (1ULL << fromIndex) << 7; // Attack West if not on a file
+        if ((startPos & ~(aFile)) != 0 && ((1ULL << toIndex) & blackPieces) != 0) attackWest = startPos << 7; // Attack West if not on a file
     
-        if (((1ULL << fromIndex) & ~(hFile)) != 0 && ((1ULL << toIndex) & blackPieces) != 0) attackEast = (1ULL << fromIndex) << 9; // Attack East if not on h file
+        if ((startPos & ~(hFile)) != 0 && ((1ULL << toIndex) & blackPieces) != 0) attackEast = startPos << 9; // Attack East if not on h file
     
     } else {
-        if ((((1ULL << fromIndex) >> 8) & (whitePieces | blackPieces)) != 0) pushFile = (1ULL << fromIndex) >> 8; // Can't push forward into other piece
+        if (((startPos >> 8) & (whitePieces | blackPieces)) != 0) pushFile = startPos >> 8; // Can't push forward into other piece
         
-        if (((1ULL << fromIndex) & (0x00FF000000000000)) != 0 && 
-            ((((1ULL << fromIndex) >> 16) & (whitePieces | blackPieces)) != 0)) doublePushFile = (1ULL << fromIndex) >> 16; // Double push if first move
+        if ((startPos & (row7)) != 0 && 
+            (((startPos >> 16) & (whitePieces | blackPieces)) != 0)) doublePushFile = startPos >> 16; // Double push if first move
         
-        if (((1ULL << fromIndex) & ~(aFile)) != 0 && ((1ULL << toIndex) & whitePieces) != 0) attackWest = (1ULL << fromIndex) >> 9; // Attack West if not on a file
+        if ((startPos & ~(aFile)) != 0 && ((1ULL << toIndex) & whitePieces) != 0) attackWest = startPos >> 9; // Attack West if not on a file
         
-        if (((1ULL << fromIndex) & ~(hFile)) != 0 && ((1ULL << toIndex) & whitePieces) != 0) attackEast = (1ULL << fromIndex) >> 7; // Attack East if not on h file
+        if ((startPos & ~(hFile)) != 0 && ((1ULL << toIndex) & whitePieces) != 0) attackEast = startPos >> 7; // Attack East if not on h file
     }
 
     return ((pushFile | doublePushFile | attackWest | attackEast) & (1ULL << toIndex)) != 0;
+}
+
+unsigned long int pawnWizard::knightMovePseudoLegal(int fromIndex) {
+    /*
+    Generates all possible pseudo legal moves for a knight at position fromIndex.
+    :param fromIndex: The bit indexed (0-63) square to move from.
+    :param toIndex: The bit indexed (0-63) square to move to.
+    :return: True/False depending on the moves legality.
+    */
+
+    unsigned long int startPos = 1ULL << fromIndex;
+    unsigned long int attacks = 0; // Will store possible attacks.
+
+
+    if ((startPos & ~(aFile)) != 0 && (startPos & ~(row7)) != 0 && (startPos & ~(row8)) != 0) attacks |= startPos << 15; // Move 2 up and 1 left
+    if ((startPos & ~(aFile)) != 0 && (startPos & ~(bFile)) != 0 && (startPos & ~(row8)) != 0) attacks |= startPos << 6; // Move 1 up and 2 left
+    if ((startPos & ~(hFile)) != 0 && (startPos & ~(row7)) != 0 && (startPos & ~(row8)) != 0) attacks |= startPos << 17; // Move 2 up and 1 right
+    if ((startPos & ~(hFile)) != 0 && (startPos & ~(gFile)) != 0 && (startPos & ~(row8)) != 0) attacks |= startPos << 10; // Move 1 up and 2 right
+    if ((startPos & ~(aFile)) != 0 && (startPos & ~(row2)) != 0 && (startPos & ~(row1)) != 0) attacks |= startPos >> 17; // Move 2 down and 1 left
+    if ((startPos & ~(aFile)) != 0 && (startPos & ~(bFile)) != 0 && (startPos & ~(row1)) != 0) attacks |= startPos >> 10; // Move 1 down and 2 left
+    if ((startPos & ~(hFile)) != 0 && (startPos & ~(row2)) != 0 && (startPos & ~(row1)) != 0) attacks |= startPos >> 15; // Move 2 down and 1 right
+    if ((startPos & ~(hFile)) != 0 && (startPos & ~(gFile)) != 0 && (startPos & ~(row1)) != 0) attacks |= startPos >> 6; // Move 1 down and 2 right
+
+    if (startPos & whiteKnights) attacks & ~(whitePieces); // Remove friendly pieces from attack options
+    if (startPos & blackKnights) attacks & ~(blackPieces); // Remove friendly pieces from attack options
+    else throw std::invalid_argument("fromIndex not occupied by knight."); // Should probably be moved to start of function but whatever
+
+    return attacks;
+
 }
