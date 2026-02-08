@@ -19,7 +19,7 @@ char pawnWizard::getPieceAtSquare(const int index) {
     :return: A char representing the piece. lowercase is black, uppercase is white.
     */
 
-    uint64_t mask = 1ULL << index;
+    unsigned long int mask = 1ULL << index;
 
     if (whitePawns & mask) return 'P';
     if (whiteKnights & mask) return 'N';
@@ -38,7 +38,7 @@ char pawnWizard::getPieceAtSquare(const int index) {
     return '.'; // Empty square
 }
 
-uint64_t& pawnWizard::getBitboardByType(const char pieceType) {
+unsigned long int& pawnWizard::getBitboardByType(const char pieceType) {
     /*
     Function to get the corresponding bitboard for a type of piece.
     :param pieceType: The type of piece represented by a char. Lowercase for black, uppercase for white.
@@ -57,10 +57,8 @@ uint64_t& pawnWizard::getBitboardByType(const char pieceType) {
     else if (pieceType == 'B') return whiteBishops;
     else if (pieceType == 'Q') return whiteQueens;
     else if (pieceType == 'K') return whiteKing;
-    else {
-        throw std::invalid_argument("Not a valid pieceType.");
-        return nullptr;
-    }
+    
+    throw std::invalid_argument("Not a valid pieceType.");
 
 }
 
@@ -82,7 +80,7 @@ void pawnWizard::printBoard() {
     std::cout << "   a b c d e f g h\n";
 }
 
-void pawnWizard::printSingleBitBoard(uint64_t &board) {
+void pawnWizard::printSingleBitBoard(unsigned long int &board) {
     /*
     Helper function to print a single piece-board to terminal.
     */
@@ -121,12 +119,10 @@ void pawnWizard::movePieceByType(char pieceType, int fromIndex, int toIndex) {
     */
 
     char pieceAtToSquare = getPieceAtSquare(toIndex);
-    uint64_t &bitboard = getBitboardByType(pieceType);
+    unsigned long int &bitboard = getBitboardByType(pieceType);
 
     if ((whiteToMove && isupper(pieceAtToSquare)) || (!whiteToMove && islower(pieceAtToSquare))) {
         throw std::invalid_argument("toIndex occupied by friendly piece.");
-        std::cout << "Error" << std::endl;
-        return;
     }
 
     // Remove the piece occupying the toIndex square.
@@ -170,11 +166,9 @@ void pawnWizard::movePiece(int fromIndex, int toIndex) {
     */
 
     char pieceType = getPieceAtSquare(fromIndex);
-    std::cout << pieceType << std::endl;
 
     if (pieceType == '.') {
         throw std::invalid_argument("Invalid fromIndex. No piece on that square.");
-        return;
     }
 
     movePieceByType(pieceType, fromIndex, toIndex);
