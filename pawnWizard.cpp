@@ -196,7 +196,6 @@ unsigned long int pawnWizard::pawnMovePseudoLegal(int fromIndex) {
     // TODO: 
     // - En pasant
     // - Promotion
-    // - Change return type to unsigned long int and remove toIndex from function
 
 
     unsigned long int startPos = 1ULL << fromIndex;
