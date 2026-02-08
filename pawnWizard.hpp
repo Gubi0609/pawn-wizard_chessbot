@@ -20,6 +20,7 @@ protected:
     unsigned long int whiteBishops = 0x0000000000000024;
     unsigned long int whiteKing = 0x0000000000000008;
     unsigned long int whiteQueens = 0x0000000000000010;
+    unsigned long int whitePieces = whitePawns | whiteRooks | whiteKnights | whiteBishops | whiteKing | whiteQueens;
 
     unsigned long int blackPawns = 0x00FF000000000000;
     unsigned long int blackRooks = 0x8100000000000000;
@@ -27,6 +28,7 @@ protected:
     unsigned long int blackBishops = 0x2400000000000000;
     unsigned long int blackKing = 0x0800000000000000;
     unsigned long int blackQueens = 0x1000000000000000;
+    unsigned long int blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
 
     bool whiteToMove = true;
     

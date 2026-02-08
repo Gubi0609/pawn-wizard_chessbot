@@ -118,10 +118,14 @@ void pawnWizard::movePieceByType(char pieceType, int fromIndex, int toIndex) {
     :param toIndex: The bit indexed (0-63) square to move to.
     */
 
+    //char pieceAtFromSquare = getPieceAtSquare(fromIndex);
     char pieceAtToSquare = getPieceAtSquare(toIndex);
     unsigned long int &bitboard = getBitboardByType(pieceType);
 
-    if ((whiteToMove && isupper(pieceAtToSquare)) || (!whiteToMove && islower(pieceAtToSquare))) {
+    if ((!whiteToMove && (((1ULL << fromIndex) & whitePieces) != 0)) || (whiteToMove && (((1ULL << fromIndex) & blackPieces) != 0))) {
+        throw std::invalid_argument("fromIndex occupied by enemy piece.");
+    }
+    if ((whiteToMove && (((1ULL << toIndex) & whitePieces) != 0)) || (!whiteToMove && (((1ULL << toIndex) & blackPieces) != 0))) {
         throw std::invalid_argument("toIndex occupied by friendly piece.");
     }
 
@@ -154,6 +158,11 @@ void pawnWizard::movePieceByType(char pieceType, int fromIndex, int toIndex) {
 
     bitboard &= ~(1ULL << fromIndex); // Remove piece from "from" square
     bitboard |= (1ULL << toIndex);    // Place piece on "to" square
+    
+    // Update the color bitboard to match new placements.
+    whitePieces = whitePawns | whiteRooks | whiteKnights | whiteBishops | whiteKing | whiteQueens;
+    blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
+    
     whiteToMove = !whiteToMove;
     
 }
