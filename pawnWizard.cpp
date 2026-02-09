@@ -120,7 +120,7 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
 
     /* TODO
         - Implement proper handling of double push and enPassant
-            - Need way to reset enPassant each turn without interrupting the pawnMovePseudoLegal check of enPassant. 
+            - Need way to reset enPassant each turn without interrupting the pawnMovePseudoLegal check of enPassant.
     */
 
     char pieceAtToSquare = getPieceAtSquare(toIndex);
@@ -165,7 +165,7 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
             break;
     }
 
-    if ((startpos << toIndex) & ~movementMask != 0) return; // If not in movementMask, we just return.
+    if ((1ULL << toIndex) & ~movementMask != 0) return; // If not in movementMask, we just return.
 
     // Remove the piece occupying the toIndex square.
     switch (pieceAtToSquare) {
@@ -209,18 +209,18 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
             break;
     }
 
+    if ((1ULL << toIndex) & enPassant && (startpos & whitePawns) != 0) blackPawns &= ~(1ULL << (toIndex-8)); // If white performs en passant, remove affected pawn from black
+    if ((1ULL << toIndex) & enPassant && (startpos & blackPawns) != 0) whitePawns &= ~(1ULL << (toIndex+8)); // If white performs en passant, remove affected pawn from black
+
+    enPassant = 0x0000000000000000; // Reset before writing new placement since en passant only holds for immediate move.
+
     bitboard &= ~(1ULL << fromIndex); // Remove piece from "from" square
 
-    // Check if a double push is performed. NEEDS CHANGING
-    if ((startpos & whitePawns) != 0 && (toIndex - fromIndex) == 16) {
-        enPassant = 0x0000000000000000; // Reset before writing new placement.
-        enPassant |= startpos << 8;
-    } else if (((startpos & blackPawns) != 0 && (fromIndex - toIndex) == 16)) {
-        enPassant = 0x0000000000000000;
-        enPassant |= startpos >> 8;
-    }
+    // Check if a double push is performed.
+    if ((startpos & whitePawns) != 0 && (toIndex - fromIndex) == 16) enPassant |= startpos << 8;
+    else if (((startpos & blackPawns) != 0 && (fromIndex - toIndex) == 16)) enPassant |= startpos >> 8;
 
-    bitboard |= (1ULL << toIndex);    // Place piece on "to" square
+    bitboard |= (1ULL << toIndex); // Place piece on "to" square
     
     // Update the color bitboards to match newest placements.
     whitePieces = whitePawns | whiteRooks | whiteKnights | whiteBishops | whiteKing | whiteQueens;
@@ -260,6 +260,7 @@ unsigned long int pawnWizard::pawnMovePseudoLegal(const int fromIndex) {
     // TODO: 
     // - En pasant
     // - Promotion
+    // - FIX THE CHECK OF toIndex AND BLACK PIECES. WE CANNOT JUST RIGHT SHIFT MORE!!!
 
 
     unsigned long int startPos = 1ULL << fromIndex;
