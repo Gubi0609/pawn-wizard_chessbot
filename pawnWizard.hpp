@@ -1,3 +1,23 @@
+// Definition of all files (a - h) as unsigned long int
+#define A_FILE 0x0101010101010101ULL
+#define B_FILE 0x0202020202020202ULL
+#define C_FILE 0x0404040404040404ULL
+#define D_FILE 0x0808080808080808ULL
+#define E_FILE 0x1010101010101010ULL
+#define F_FILE 0x2020202020202020ULL
+#define G_FILE 0x4040404040404040ULL
+#define H_FILE 0x8080808080808080ULL
+
+// Definition of all rows (1 - 8) as unsigned long int
+#define ROW_1 0x00000000000000FFULL
+#define ROW_2 0x000000000000FF00ULL
+#define ROW_3 0x0000000000FF0000ULL
+#define ROW_4 0x00000000FF000000ULL
+#define ROW_5 0x000000FF00000000ULL
+#define ROW_6 0x0000FF0000000000ULL
+#define ROW_7 0x00FF000000000000ULL
+#define ROW_8 0xFF00000000000000ULL
+
 class pawnWizard {
 
 public:
@@ -35,24 +55,6 @@ protected:
     unsigned long int blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
 
     unsigned long int enPassant = 0x0000000000000000;
-
-    const unsigned long int aFile = 0x0101010101010101;
-    const unsigned long int bFile = 0x0202020202020202;
-    const unsigned long int cFile = 0x0404040404040404;
-    const unsigned long int dFile = 0x0808080808080808;
-    const unsigned long int eFile = 0x1010101010101010;
-    const unsigned long int fFile = 0x2020202020202020;
-    const unsigned long int gFile = 0x4040404040404040;
-    const unsigned long int hFile = 0x8080808080808080;
-
-    const unsigned long int row1 = 0x00000000000000FF;
-    const unsigned long int row2 = 0x000000000000FF00;
-    const unsigned long int row3 = 0x0000000000FF0000;
-    const unsigned long int row4 = 0x00000000FF000000;
-    const unsigned long int row5 = 0x000000FF00000000;
-    const unsigned long int row6 = 0x0000FF0000000000;
-    const unsigned long int row7 = 0x00FF000000000000;
-    const unsigned long int row8 = 0xFF00000000000000;
 
     bool whiteToMove = true;
     

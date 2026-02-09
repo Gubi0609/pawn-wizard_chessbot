@@ -224,26 +224,26 @@ unsigned long int pawnWizard::pawnMovePseudoLegal(const int fromIndex) {
     if ((startPos & whitePawns) != 0) {
         if (((startPos << 8) & ~(whitePieces | blackPieces)) != 0) moves |= startPos << 8; // Can't push forward into other piece
         
-        if ((startPos & (row2)) != 0 && 
+        if ((startPos & (ROW_2)) != 0 && 
             (((startPos << 16) & ~(whitePieces | blackPieces)) != 0)) moves |= startPos << 16; // Double push if first move
         
-        if ((startPos & ~(aFile)) != 0 && ((startPos << 7) & blackPieces) != 0) moves |= startPos << 7; // Attack West if not on a file
-        if ((startPos & ~(hFile)) != 0 && ((startPos << 9) & blackPieces) != 0) moves |= startPos << 9; // Attack East if not on h file
+        if ((startPos & ~(A_FILE)) != 0 && ((startPos << 7) & blackPieces) != 0) moves |= startPos << 7; // Attack West if not on a file
+        if ((startPos & ~(H_FILE)) != 0 && ((startPos << 9) & blackPieces) != 0) moves |= startPos << 9; // Attack East if not on h file
 
-        if ((startPos & ~(aFile)) != 0 && ((startPos << 7) & enPassant) != 0) moves |= startPos << 7; // En passant west if not on a file
-        if ((startPos & ~(hFile)) != 0 && ((startPos << 9) & enPassant) != 0) moves |= startPos << 9; // En passant east if not on h file
+        if ((startPos & ~(A_FILE)) != 0 && ((startPos << 7) & enPassant) != 0) moves |= startPos << 7; // En passant west if not on a file
+        if ((startPos & ~(H_FILE)) != 0 && ((startPos << 9) & enPassant) != 0) moves |= startPos << 9; // En passant east if not on h file
     
     } else if ((startPos & blackPawns) != 0) {
         if (((startPos >> 8) & ~(whitePieces | blackPieces)) != 0) moves |= startPos >> 8; // Can't push forward into other piece
         
-        if ((startPos & (row7)) != 0 && 
+        if ((startPos & (ROW_7)) != 0 && 
             (((startPos >> 16) & ~(whitePieces | blackPieces)) != 0)) moves |= startPos >> 16; // Double push if first move
         
-        if ((startPos & ~(aFile)) != 0 && ((startPos >> 9) & whitePieces) != 0) moves |= startPos >> 9; // Attack West if not on a file
-        if ((startPos & ~(hFile)) != 0 && ((startPos >> 7) & whitePieces) != 0) moves |= startPos >> 7; // Attack East if not on h file
+        if ((startPos & ~(A_FILE)) != 0 && ((startPos >> 9) & whitePieces) != 0) moves |= startPos >> 9; // Attack West if not on a file
+        if ((startPos & ~(H_FILE)) != 0 && ((startPos >> 7) & whitePieces) != 0) moves |= startPos >> 7; // Attack East if not on h file
 
-        if ((startPos & ~(aFile)) != 0 && ((startPos >> 9) & enPassant) != 0) moves |= startPos >> 9; // En passant west if not on a file
-        if ((startPos & ~(hFile)) != 0 && ((startPos >> 7) & enPassant) != 0) moves |= startPos >> 7; // En passant east if not on h file
+        if ((startPos & ~(A_FILE)) != 0 && ((startPos >> 9) & enPassant) != 0) moves |= startPos >> 9; // En passant west if not on a file
+        if ((startPos & ~(H_FILE)) != 0 && ((startPos >> 7) & enPassant) != 0) moves |= startPos >> 7; // En passant east if not on h file
     }
 
     return moves;
@@ -263,14 +263,14 @@ unsigned long int pawnWizard::knightMovePseudoLegal(const int fromIndex) {
     unsigned long int attacks = 0; // Will store possible attacks.
 
 
-    if ((startPos & ~(aFile)) != 0 && (startPos & ~(row7)) != 0 && (startPos & ~(row8)) != 0) attacks |= startPos << 15; // Move 2 up and 1 left
-    if ((startPos & ~(aFile)) != 0 && (startPos & ~(bFile)) != 0 && (startPos & ~(row8)) != 0) attacks |= startPos << 6; // Move 1 up and 2 left
-    if ((startPos & ~(hFile)) != 0 && (startPos & ~(row7)) != 0 && (startPos & ~(row8)) != 0) attacks |= startPos << 17; // Move 2 up and 1 right
-    if ((startPos & ~(hFile)) != 0 && (startPos & ~(gFile)) != 0 && (startPos & ~(row8)) != 0) attacks |= startPos << 10; // Move 1 up and 2 right
-    if ((startPos & ~(aFile)) != 0 && (startPos & ~(row2)) != 0 && (startPos & ~(row1)) != 0) attacks |= startPos >> 17; // Move 2 down and 1 left
-    if ((startPos & ~(aFile)) != 0 && (startPos & ~(bFile)) != 0 && (startPos & ~(row1)) != 0) attacks |= startPos >> 10; // Move 1 down and 2 left
-    if ((startPos & ~(hFile)) != 0 && (startPos & ~(row2)) != 0 && (startPos & ~(row1)) != 0) attacks |= startPos >> 15; // Move 2 down and 1 right
-    if ((startPos & ~(hFile)) != 0 && (startPos & ~(gFile)) != 0 && (startPos & ~(row1)) != 0) attacks |= startPos >> 6; // Move 1 down and 2 right
+    if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_7)) != 0 && (startPos & ~(ROW_8)) != 0) attacks |= startPos << 15; // Move 2 up and 1 left
+    if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(B_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) attacks |= startPos << 6; // Move 1 up and 2 left
+    if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_7)) != 0 && (startPos & ~(ROW_8)) != 0) attacks |= startPos << 17; // Move 2 up and 1 right
+    if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(G_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) attacks |= startPos << 10; // Move 1 up and 2 right
+    if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_2)) != 0 && (startPos & ~(ROW_1)) != 0) attacks |= startPos >> 17; // Move 2 down and 1 left
+    if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(B_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) attacks |= startPos >> 10; // Move 1 down and 2 left
+    if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_2)) != 0 && (startPos & ~(ROW_1)) != 0) attacks |= startPos >> 15; // Move 2 down and 1 right
+    if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(G_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) attacks |= startPos >> 6; // Move 1 down and 2 right
 
     if ((startPos & whiteKnights) != 0) attacks &= ~(whitePieces); // Remove friendly pieces from attack options
     else if ((startPos & blackKnights) != 0) attacks &= ~(blackPieces); // Remove friendly pieces from attack options
