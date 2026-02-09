@@ -129,30 +129,45 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     }
 
     // Remove the piece occupying the toIndex square.
-    if (pieceAtToSquare == 'p'){
-        blackPawns &= ~(1ULL << toIndex);
-    } else if (pieceAtToSquare == 'n'){
-        blackKnights &= ~(1ULL << toIndex);
-    } else if (pieceAtToSquare == 'b'){
-        blackBishops &= ~(1ULL << toIndex);
-    } else if (pieceAtToSquare == 'r'){
-        blackRooks &= ~(1ULL << toIndex);
-    } else if (pieceAtToSquare == 'q'){
-        blackQueens &= ~(1ULL << toIndex);
-    } else if (pieceAtToSquare == 'k'){
-        blackKing &= ~(1ULL << toIndex);
-    } else if (pieceAtToSquare == 'P'){
-        whitePawns &= ~(1ULL << toIndex);
-    } else if (pieceAtToSquare == 'N'){
-        whiteKnights &= ~(1ULL << toIndex);
-    } else if (pieceAtToSquare == 'B'){
-        whiteBishops &= ~(1ULL << toIndex);
-    } else if (pieceAtToSquare == 'R'){
-        whiteRooks &= ~(1ULL << toIndex);
-    } else if (pieceAtToSquare == 'Q'){
-        whiteQueens &= ~(1ULL << toIndex);
-    } else if (pieceAtToSquare == 'K'){
-        whiteKing &= ~(1ULL << toIndex);
+    switch (pieceAtToSquare) {
+        case 'p':
+            blackPawns &= ~(1ULL << toIndex);
+            break;
+        case 'n':
+            blackKnights &= ~(1ULL << toIndex);
+            break;
+        case 'b':
+            blackBishops &= ~(1ULL << toIndex);
+            break;
+        case 'r':
+            blackRooks &= ~(1ULL << toIndex);
+            break;
+        case 'q':
+            blackQueens &= ~(1ULL << toIndex);
+            break;
+        case 'k':
+            blackKing &= ~(1ULL << toIndex);
+            break;
+        case 'P':
+            whitePawns &= ~(1ULL << toIndex);
+            break;
+        case 'N':
+            whiteKnights &= ~(1ULL << toIndex);
+            break;
+        case 'B':
+            whiteBishops &= ~(1ULL << toIndex);
+            break;
+        case 'R':
+            whiteRooks &= ~(1ULL << toIndex);
+            break;
+        case 'Q':
+            whiteQueens &= ~(1ULL << toIndex);
+            break;
+        case 'K':
+            whiteKing &= ~(1ULL << toIndex);
+            break;
+        default:
+            break;
     }
 
     bitboard &= ~(1ULL << fromIndex); // Remove piece from "from" square
