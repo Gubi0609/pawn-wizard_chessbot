@@ -120,6 +120,8 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
 
     char pieceAtToSquare = getPieceAtSquare(toIndex);
     unsigned long int& bitboard = getBitboardByType(pieceType);
+    unsigned long int startpos = 1ULL << fromIndex;
+    bool pawnDoublePush = false;
 
     if ((!whiteToMove && (((1ULL << fromIndex) & whitePieces) != 0)) || (whiteToMove && (((1ULL << fromIndex) & blackPieces) != 0))) {
         throw std::invalid_argument("fromIndex occupied by enemy piece.");
@@ -127,6 +129,39 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     if ((whiteToMove && (((1ULL << toIndex) & whitePieces) != 0)) || (!whiteToMove && (((1ULL << toIndex) & blackPieces) != 0))) {
         throw std::invalid_argument("toIndex occupied by friendly piece.");
     }
+
+    unsigned long int movementMask = 0;
+
+    switch (pieceType) {
+        case 'p':
+        case 'P':
+            movementMask = pawnMovePseudoLegal(fromIndex);
+            break;
+        case 'n':
+        case 'N':
+            movementMask = knightMovePseudoLegal(fromIndex);
+            break;
+        // case 'b':
+        // case 'B':
+        //    movementMask = bishopMovePseudoLegal(fromIndex);
+        //    break;
+        // case 'r':
+        // case 'R':
+        //    movementMask = rookMovePseudoLegal(fromIndex);
+        //    break;
+        // case 'q':
+        // case 'Q':
+        //    movementMask = queenMovePseudoLegal(fromIndex);
+        //    break;
+        // case 'k':
+        // case 'K':
+        //    movementMask = kingMovePseudoLegal(fromIndex);
+        //    break;
+        default:
+            break;
+    }
+
+    if ((startpos << toIndex) & ~movementMask != 0) return; // If not in movementMask, we just return.
 
     // Remove the piece occupying the toIndex square.
     switch (pieceAtToSquare) {
@@ -171,6 +206,15 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     }
 
     bitboard &= ~(1ULL << fromIndex); // Remove piece from "from" square
+
+    if ((startpos & whitePawns) != 0 && (toIndex - fromIndex) == 16) {
+        pawnDoublePush = true;
+        enPassant |= startpos << 8;
+    } else if (((startpos & blackPawns) != 0 && (fromIndex - toIndex) == 16)) {
+        pawnDoublePush = true;
+        enPassant |= startpos >> 8;
+    }
+
     bitboard |= (1ULL << toIndex);    // Place piece on "to" square
     
     // Update the color bitboards to match newest placements.
@@ -178,6 +222,8 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
 
     whiteToMove = !whiteToMove;
+
+    if(!pawnDoublePush) enPassant = 0x0000000000000000;
     
 }
 
