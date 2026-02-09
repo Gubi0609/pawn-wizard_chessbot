@@ -34,6 +34,8 @@ protected:
     unsigned long int blackQueens = 0x0800000000000000;
     unsigned long int blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
 
+    unsigned long int enPassant = 0x0000000000000000;
+
     const unsigned long int aFile = 0x0101010101010101;
     const unsigned long int bFile = 0x0202020202020202;
     const unsigned long int cFile = 0x0404040404040404;

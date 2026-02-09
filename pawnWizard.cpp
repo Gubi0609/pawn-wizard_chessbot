@@ -213,8 +213,10 @@ unsigned long int pawnWizard::pawnMovePseudoLegal(const int fromIndex) {
             (((startPos << 16) & ~(whitePieces | blackPieces)) != 0)) moves |= startPos << 16; // Double push if first move
         
         if ((startPos & ~(aFile)) != 0 && ((startPos << 7) & blackPieces) != 0) moves |= startPos << 7; // Attack West if not on a file
-    
         if ((startPos & ~(hFile)) != 0 && ((startPos << 9) & blackPieces) != 0) moves |= startPos << 9; // Attack East if not on h file
+
+        if ((startPos & ~(aFile)) != 0 && ((startPos << 7) & enPassant) != 0) moves |= startPos << 7; // En passant west if not on a file
+        if ((startPos & ~(hFile)) != 0 && ((startPos << 9) & enPassant) != 0) moves |= startPos << 9; // En passant east if not on h file
     
     } else if ((startPos & blackPawns) != 0) {
         if (((startPos >> 8) & ~(whitePieces | blackPieces)) != 0) moves |= startPos >> 8; // Can't push forward into other piece
@@ -223,8 +225,10 @@ unsigned long int pawnWizard::pawnMovePseudoLegal(const int fromIndex) {
             (((startPos >> 16) & ~(whitePieces | blackPieces)) != 0)) moves |= startPos >> 16; // Double push if first move
         
         if ((startPos & ~(aFile)) != 0 && ((startPos >> 9) & whitePieces) != 0) moves |= startPos >> 9; // Attack West if not on a file
-        
         if ((startPos & ~(hFile)) != 0 && ((startPos >> 7) & whitePieces) != 0) moves |= startPos >> 7; // Attack East if not on h file
+
+        if ((startPos & ~(aFile)) != 0 && ((startPos >> 9) & enPassant) != 0) moves |= startPos >> 9; // En passant west if not on a file
+        if ((startPos & ~(hFile)) != 0 && ((startPos >> 7) & enPassant) != 0) moves |= startPos >> 7; // En passant east if not on h file
     }
 
     return moves;
