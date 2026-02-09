@@ -118,10 +118,14 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     :param toIndex: The bit indexed (0-63) square to move to.
     */
 
+    /* TODO
+        - Implement proper handling of double push and enPassant
+            - Need way to reset enPassant each turn without interrupting the pawnMovePseudoLegal check of enPassant. 
+    */
+
     char pieceAtToSquare = getPieceAtSquare(toIndex);
     unsigned long int& bitboard = getBitboardByType(pieceType);
     unsigned long int startpos = 1ULL << fromIndex;
-    bool pawnDoublePush = false;
 
     if ((!whiteToMove && (((1ULL << fromIndex) & whitePieces) != 0)) || (whiteToMove && (((1ULL << fromIndex) & blackPieces) != 0))) {
         throw std::invalid_argument("fromIndex occupied by enemy piece.");
@@ -207,11 +211,12 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
 
     bitboard &= ~(1ULL << fromIndex); // Remove piece from "from" square
 
+    // Check if a double push is performed. NEEDS CHANGING
     if ((startpos & whitePawns) != 0 && (toIndex - fromIndex) == 16) {
-        pawnDoublePush = true;
+        enPassant = 0x0000000000000000; // Reset before writing new placement.
         enPassant |= startpos << 8;
     } else if (((startpos & blackPawns) != 0 && (fromIndex - toIndex) == 16)) {
-        pawnDoublePush = true;
+        enPassant = 0x0000000000000000;
         enPassant |= startpos >> 8;
     }
 
@@ -222,8 +227,6 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
 
     whiteToMove = !whiteToMove;
-
-    if(!pawnDoublePush) enPassant = 0x0000000000000000;
     
 }
 
