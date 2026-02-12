@@ -118,11 +118,6 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     :param toIndex: The bit indexed (0-63) square to move to.
     */
 
-    /* TODO
-        - Implement proper handling of double push and enPassant
-            - Need way to reset enPassant each turn without interrupting the pawnMovePseudoLegal check of enPassant.
-    */
-
     char pieceAtToSquare = getPieceAtSquare(toIndex);
     unsigned long int& bitboard = getBitboardByType(pieceType);
     unsigned long int startpos = 1ULL << fromIndex;
@@ -258,9 +253,7 @@ unsigned long int pawnWizard::pawnMovePseudoLegal(const int fromIndex) {
     */
 
     // TODO: 
-    // - En pasant
     // - Promotion
-    // - FIX THE CHECK OF toIndex AND BLACK PIECES. WE CANNOT JUST RIGHT SHIFT MORE!!!
 
 
     unsigned long int startPos = 1ULL << fromIndex;
