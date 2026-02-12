@@ -165,7 +165,7 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
             break;
     }
 
-    if ((1ULL << toIndex) & ~movementMask != 0) return; // If not in movementMask, we just return.
+    if (((1ULL << toIndex) & ~movementMask) != 0) return; // If not in movementMask, we just return.
 
     // Remove the piece occupying the toIndex square.
     switch (pieceAtToSquare) {
@@ -214,11 +214,11 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
 
     enPassant = 0x0000000000000000; // Reset before writing new placement since en passant only holds for immediate move.
 
-    bitboard &= ~(1ULL << fromIndex); // Remove piece from "from" square
-
     // Check if a double push is performed.
     if ((startpos & whitePawns) != 0 && (toIndex - fromIndex) == 16) enPassant |= startpos << 8;
-    else if (((startpos & blackPawns) != 0 && (fromIndex - toIndex) == 16)) enPassant |= startpos >> 8;
+    else if ((startpos & blackPawns) != 0 && (fromIndex - toIndex) == 16) enPassant |= startpos >> 8;
+
+    bitboard &= ~(1ULL << fromIndex); // Remove piece from "from" square
 
     bitboard |= (1ULL << toIndex); // Place piece on "to" square
     
