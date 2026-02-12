@@ -36,6 +36,7 @@ public:
     // Legal move functions
     unsigned long int pawnMovePseudoLegal(const int fromIndex);
     unsigned long int knightMovePseudoLegal(const int fromIndex);
+    unsigned long int kingMovePseudoLegal(const int fromIndex);
 
 protected:
     unsigned long int whitePawns = 0x000000000000FF00;

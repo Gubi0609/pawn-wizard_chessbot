@@ -303,21 +303,31 @@ unsigned long int pawnWizard::knightMovePseudoLegal(const int fromIndex) {
 
     if ((startPos & ~(whiteKnights | blackKnights)) != 0) throw std::invalid_argument("fromIndex not occupied by knight.");
 
-    unsigned long int attacks = 0; // Will store possible attacks.
+    unsigned long int moves = 0; // Will store possible moves.
 
 
-    if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_7)) != 0 && (startPos & ~(ROW_8)) != 0) attacks |= startPos << 15; // Move 2 up and 1 left
-    if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(B_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) attacks |= startPos << 6; // Move 1 up and 2 left
-    if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_7)) != 0 && (startPos & ~(ROW_8)) != 0) attacks |= startPos << 17; // Move 2 up and 1 right
-    if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(G_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) attacks |= startPos << 10; // Move 1 up and 2 right
-    if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_2)) != 0 && (startPos & ~(ROW_1)) != 0) attacks |= startPos >> 17; // Move 2 down and 1 left
-    if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(B_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) attacks |= startPos >> 10; // Move 1 down and 2 left
-    if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_2)) != 0 && (startPos & ~(ROW_1)) != 0) attacks |= startPos >> 15; // Move 2 down and 1 right
-    if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(G_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) attacks |= startPos >> 6; // Move 1 down and 2 right
+    if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_7)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 15; // Move 2 up and 1 left
+    if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(B_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 6; // Move 1 up and 2 left
+    if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_7)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 17; // Move 2 up and 1 right
+    if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(G_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 10; // Move 1 up and 2 right
+    if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_2)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 17; // Move 2 down and 1 left
+    if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(B_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 10; // Move 1 down and 2 left
+    if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_2)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 15; // Move 2 down and 1 right
+    if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(G_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 6; // Move 1 down and 2 right
 
-    if ((startPos & whiteKnights) != 0) attacks &= ~(whitePieces); // Remove friendly pieces from attack options
-    else if ((startPos & blackKnights) != 0) attacks &= ~(blackPieces); // Remove friendly pieces from attack options
+    if ((startPos & whiteKnights) != 0) moves &= ~(whitePieces); // Remove friendly pieces from attack options
+    else if ((startPos & blackKnights) != 0) moves &= ~(blackPieces); // Remove friendly pieces from attack options
 
-    return attacks;
+    return moves;
 
+}
+
+unsigned long int pawnWizard::kingMovePseudoLegal(const int fromIndex) {
+    /*
+    Generates all possible pseudo legal moves for a king at position fromIndex.
+    :param fromIndex: The bit indexed (0-63) square to move from.
+    :return: unsigned long int with a binary value corresponding to the moveable squares.
+    */
+
+    // Start with a mask of surrounding squares (possible moves) and remove illegal squares by row and file check. Then shift to match placement.
 }
