@@ -329,5 +329,30 @@ unsigned long int pawnWizard::kingMovePseudoLegal(const int fromIndex) {
     :return: unsigned long int with a binary value corresponding to the moveable squares.
     */
 
-    // Start with a mask of surrounding squares (possible moves) and remove illegal squares by row and file check. Then shift to match placement.
+    // TODO
+    // - Castling
+    // - Testing
+
+    unsigned long int startPos = 1ULL << fromIndex;
+
+    if ((startPos & ~(whiteKing | blackKing)) != 0) throw std::invalid_argument("fromIndex not occupied by king.");
+
+    unsigned long int moves = 0;
+
+    if((startPos & ~(A_FILE)) != 0) moves |= startPos >> 1;
+    if((startPos & ~(H_FILE)) != 0) moves |= startPos << 1;
+    if((startPos & ~(ROW_1)) != 0) moves |= startPos >> 8;
+    if((startPos & ~(ROW_8)) != 0) moves |= startPos << 8;
+    
+    if((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 9;
+    if((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 7;
+    if((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 7;
+    if((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 9;
+
+    if ((startPos & whiteKing) != 0) moves &= ~(whitePieces); // Remove friendly pieces from attack options
+    else if ((startPos & blackKing) != 0) moves &= ~(blackPieces); // Remove friendly pieces from attack options
+
+    return moves;
+    
+
 }
