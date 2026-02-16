@@ -118,9 +118,6 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     :param toIndex: The bit indexed (0-63) square to move to.
     */
 
-    // TODO:
-    // - Implement toggling of castling
-
     char pieceAtToSquare = getPieceAtSquare(toIndex);
     unsigned long int& bitboard = getBitboardByType(pieceType);
     unsigned long int startpos = 1ULL << fromIndex;
@@ -207,8 +204,9 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
             break;
     }
 
-    if ((1ULL << toIndex) & enPassant && (startpos & whitePawns) != 0) blackPawns &= ~(1ULL << (toIndex-8)); // If white performs en passant, remove affected pawn from black
-    if ((1ULL << toIndex) & enPassant && (startpos & blackPawns) != 0) whitePawns &= ~(1ULL << (toIndex+8)); // If white performs en passant, remove affected pawn from black
+    // Updating enPassant 
+    if (((1ULL << toIndex) & enPassant) != 0 && (startpos & whitePawns) != 0) blackPawns &= ~(1ULL << (toIndex-8)); // If white performs en passant, remove affected pawn from black
+    if (((1ULL << toIndex) & enPassant) != 0 && (startpos & blackPawns) != 0) whitePawns &= ~(1ULL << (toIndex+8)); // If black performs en passant, remove affected pawn from white
 
     enPassant = 0x0000000000000000; // Reset before writing new placement since en passant only holds for immediate move.
 
@@ -216,10 +214,12 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     if ((startpos & whitePawns) != 0 && (toIndex - fromIndex) == 16) enPassant |= startpos << 8;
     else if ((startpos & blackPawns) != 0 && (fromIndex - toIndex) == 16) enPassant |= startpos >> 8;
 
-    bitboard &= ~(1ULL << fromIndex); // Remove piece from "from" square
 
+    // Updating relevant bitboard to move piece
+    bitboard &= ~(1ULL << fromIndex); // Remove piece from "from" square
     bitboard |= (1ULL << toIndex); // Place piece on "to" square
     
+
     // Update the color bitboards to match newest placements.
     whitePieces = whitePawns | whiteRooks | whiteKnights | whiteBishops | whiteKing | whiteQueens;
     blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
@@ -334,6 +334,22 @@ unsigned long int pawnWizard::kingMovePseudoLegal(const int fromIndex) {
 
     // TODO
     // - Testing
+
+    // If king has moved, disable castling
+    if ((whiteKing & ~(WHITE_KING_START)) != 0) {
+        whiteCastleEast = false;
+        whiteCastleWest = false;
+    }
+    if ((whiteKing & ~(BLACK_KING_START)) != 0) {
+        blackCastleEast = false;
+        blackCastleWest = false;
+    }
+
+    // If rook has moved, disable castling in the corresponding side
+    if ((whiteRooks & ~(WHITE_ROOKS_START & H_FILE)) != 0) whiteCastleEast = false;
+    if ((whiteRooks & ~(WHITE_ROOKS_START & A_FILE)) != 0) whiteCastleWest = false;
+    if ((blackRooks & ~(BLACK_ROOKS_START & H_FILE)) != 0) blackCastleEast = false;
+    if ((blackRooks & ~(BLACK_ROOKS_START & A_FILE)) != 0) whiteCastleWest = false;
 
     unsigned long int startPos = 1ULL << fromIndex;
 

@@ -18,6 +18,22 @@
 #define ROW_7 0x00FF000000000000ULL
 #define ROW_8 0xFF00000000000000ULL
 
+
+// Starting positions
+#define WHITE_PAWNS_START   0x000000000000FF00
+#define WHITE_ROOKS_START   0x0000000000000081
+#define WHITE_KNIGHTS_START 0x0000000000000042
+#define WHITE_BISHOPS_START 0x0000000000000024
+#define WHITE_KING_START    0x0000000000000010
+#define WHITE_QUEENS_START  0x0000000000000008
+
+#define BLACK_PAWNS_START   0x00FF000000000000
+#define BLACK_ROOKS_START   0x8100000000000000
+#define BLACK_KNIGHTS_START 0x4200000000000000
+#define BLACK_BISHOPS_START 0x2400000000000000
+#define BLACK_KING_START    0x1000000000000000
+#define BLACK_QUEEN_START   0x0800000000000000
+
 class pawnWizard {
 
 public:
@@ -39,20 +55,20 @@ public:
     unsigned long int kingMovePseudoLegal(const int fromIndex);
 
 protected:
-    unsigned long int whitePawns = 0x000000000000FF00;
-    unsigned long int whiteRooks = 0x0000000000000081;
-    unsigned long int whiteKnights = 0x0000000000000042;
-    unsigned long int whiteBishops = 0x0000000000000024;
-    unsigned long int whiteKing = 0x0000000000000010;
-    unsigned long int whiteQueens = 0x0000000000000008;
+    unsigned long int whitePawns = WHITE_PAWNS_START;
+    unsigned long int whiteRooks = WHITE_ROOKS_START;
+    unsigned long int whiteKnights = WHITE_KNIGHTS_START;
+    unsigned long int whiteBishops = WHITE_BISHOPS_START;
+    unsigned long int whiteKing = WHITE_KING_START;
+    unsigned long int whiteQueens = WHITE_QUEENS_START;
     unsigned long int whitePieces = whitePawns | whiteRooks | whiteKnights | whiteBishops | whiteKing | whiteQueens;
 
-    unsigned long int blackPawns = 0x00FF000000000000;
-    unsigned long int blackRooks = 0x8100000000000000;
-    unsigned long int blackKnights = 0x4200000000000000;
-    unsigned long int blackBishops = 0x2400000000000000;
-    unsigned long int blackKing = 0x1000000000000000;
-    unsigned long int blackQueens = 0x0800000000000000;
+    unsigned long int blackPawns = BLACK_PAWNS_START;
+    unsigned long int blackRooks = BLACK_ROOKS_START;
+    unsigned long int blackKnights = BLACK_KNIGHTS_START;
+    unsigned long int blackBishops = BLACK_BISHOPS_START;
+    unsigned long int blackKing = BLACK_KING_START;
+    unsigned long int blackQueens = BLACK_QUEEN_START;
     unsigned long int blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
 
     unsigned long int enPassant = 0x0000000000000000;
