@@ -118,6 +118,9 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     :param toIndex: The bit indexed (0-63) square to move to.
     */
 
+    // TODO:
+    // - Move rook if castling
+
     char pieceAtToSquare = getPieceAtSquare(toIndex);
     unsigned long int& bitboard = getBitboardByType(pieceType);
     unsigned long int startpos = 1ULL << fromIndex;
