@@ -123,7 +123,7 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
 
     char pieceAtToSquare = getPieceAtSquare(toIndex);
     unsigned long int& bitboard = getBitboardByType(pieceType);
-    unsigned long int startpos = 1ULL << fromIndex;
+    unsigned long int startPos = 1ULL << fromIndex;
 
     if ((!whiteToMove && (((1ULL << fromIndex) & whitePieces) != 0)) || (whiteToMove && (((1ULL << fromIndex) & blackPieces) != 0))) {
         throw std::invalid_argument("fromIndex occupied by enemy piece.");
@@ -208,20 +208,37 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     }
 
     // Updating enPassant 
-    if (((1ULL << toIndex) & enPassant) != 0 && (startpos & whitePawns) != 0) blackPawns &= ~(1ULL << (toIndex-8)); // If white performs en passant, remove affected pawn from black
-    if (((1ULL << toIndex) & enPassant) != 0 && (startpos & blackPawns) != 0) whitePawns &= ~(1ULL << (toIndex+8)); // If black performs en passant, remove affected pawn from white
+    if (((1ULL << toIndex) & enPassant) != 0 && (startPos & whitePawns) != 0) blackPawns &= ~(1ULL << (toIndex-8)); // If white performs en passant, remove affected pawn from black
+    if (((1ULL << toIndex) & enPassant) != 0 && (startPos & blackPawns) != 0) whitePawns &= ~(1ULL << (toIndex+8)); // If black performs en passant, remove affected pawn from white
 
     enPassant = 0x0000000000000000; // Reset before writing new placement since en passant only holds for immediate move.
 
     // Check if a double push is performed.
-    if ((startpos & whitePawns) != 0 && (toIndex - fromIndex) == 16) enPassant |= startpos << 8;
-    else if ((startpos & blackPawns) != 0 && (fromIndex - toIndex) == 16) enPassant |= startpos >> 8;
+    if ((startPos & whitePawns) != 0 && (toIndex - fromIndex) == 16) enPassant |= startPos << 8;
+    else if ((startPos & blackPawns) != 0 && (fromIndex - toIndex) == 16) enPassant |= startPos >> 8;
 
 
     // Updating relevant bitboard to move piece
     bitboard &= ~(1ULL << fromIndex); // Remove piece from "from" square
     bitboard |= (1ULL << toIndex); // Place piece on "to" square
+
+    if ((startPos & whiteKing) != 0 && (fromIndex - toIndex) == 2) { // If whiteKing castles east
+        whiteRooks &= ~(1ULL << 7); // Update rook board
+        whiteRooks |= (1ULL << 5);
+    }
+    if ((startPos & whiteKing) != 0 && (fromIndex - toIndex) == -2) { // If whiteKing castles west
+        whiteRooks &= ~(1ULL << 0); // Update rook board
+        whiteRooks |= (1ULL << 3);
+    }
     
+    if ((startPos & blackKing) != 0 && (fromIndex - toIndex) == 2) { // If blackKing castles east
+        blackRooks &= ~(1ULL << 63); // Update rook board
+        blackRooks |= (1ULL << 61);
+    }
+    if ((startPos & blackKing) != 0 && (fromIndex - toIndex) == -2) { // If blackKing castles west
+        blackRooks &= ~(1ULL << 56); // Update rook board
+        whiteRooks |= (1ULL << 59);
+    }
 
     // Update the color bitboards to match newest placements.
     whitePieces = whitePawns | whiteRooks | whiteKnights | whiteBishops | whiteKing | whiteQueens;
