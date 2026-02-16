@@ -56,6 +56,10 @@ protected:
     unsigned long int blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
 
     unsigned long int enPassant = 0x0000000000000000;
+    bool whiteCastleWest = true;
+    bool whiteCastleEast = true;
+    bool blackCastleWest = true;
+    bool blackCastleEast = true;
 
     bool whiteToMove = true;
     

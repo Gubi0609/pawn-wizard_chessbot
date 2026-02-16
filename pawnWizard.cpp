@@ -118,6 +118,9 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     :param toIndex: The bit indexed (0-63) square to move to.
     */
 
+    // TODO:
+    // - Implement toggling of castling
+
     char pieceAtToSquare = getPieceAtSquare(toIndex);
     unsigned long int& bitboard = getBitboardByType(pieceType);
     unsigned long int startpos = 1ULL << fromIndex;
@@ -152,10 +155,10 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
         // case 'Q':
         //    movementMask = queenMovePseudoLegal(fromIndex);
         //    break;
-        // case 'k':
-        // case 'K':
-        //    movementMask = kingMovePseudoLegal(fromIndex);
-        //    break;
+        case 'k':
+        case 'K':
+            movementMask = kingMovePseudoLegal(fromIndex);
+            break;
         default:
             break;
     }
@@ -330,7 +333,6 @@ unsigned long int pawnWizard::kingMovePseudoLegal(const int fromIndex) {
     */
 
     // TODO
-    // - Castling
     // - Testing
 
     unsigned long int startPos = 1ULL << fromIndex;
@@ -339,15 +341,21 @@ unsigned long int pawnWizard::kingMovePseudoLegal(const int fromIndex) {
 
     unsigned long int moves = 0;
 
-    if((startPos & ~(A_FILE)) != 0) moves |= startPos >> 1;
-    if((startPos & ~(H_FILE)) != 0) moves |= startPos << 1;
-    if((startPos & ~(ROW_1)) != 0) moves |= startPos >> 8;
-    if((startPos & ~(ROW_8)) != 0) moves |= startPos << 8;
+    if((startPos & ~(A_FILE)) != 0) moves |= startPos >> 1; // Move west
+    if((startPos & ~(H_FILE)) != 0) moves |= startPos << 1; // Move east
+    if((startPos & ~(ROW_1)) != 0) moves |= startPos >> 8; // Move south
+    if((startPos & ~(ROW_8)) != 0) moves |= startPos << 8; // Move north
     
-    if((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 9;
-    if((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 7;
-    if((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 7;
-    if((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 9;
+    if((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 9; // Move south east
+    if((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 7; // Move north east
+    if((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 7; // Move south west
+    if((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 9; // Move south east
+
+    if((startPos & whiteKing) != 0 && whiteCastleEast && ((whitePieces | blackPieces) & ~(ROW_1 & F_FILE & G_FILE)) != 0) moves |= 1ULL << 7; // If able to castle (castleEast true and no block), castle
+    if((startPos & whiteKing) != 0 && whiteCastleWest && ((whitePieces | blackPieces) & ~(ROW_1 & B_FILE & C_FILE & D_FILE)) != 0) moves |= 1ULL << 3; // If able to castle (castleWest true and no block), castle
+
+    if((startPos & blackKing) != 0 && blackCastleEast && ((whitePieces | blackPieces) & ~(ROW_8 & F_FILE & G_FILE)) != 0) moves |= 1ULL << 62; // If able to castle (castleEast true and no block), castle
+    if((startPos & blackKing) != 0 && blackCastleWest && ((whitePieces | blackPieces) & ~(ROW_8 & B_FILE & C_FILE & D_FILE)) != 0) moves |= 1ULL << 58; // If able to castle (castleWest true and no block), castle
 
     if ((startPos & whiteKing) != 0) moves &= ~(whitePieces); // Remove friendly pieces from attack options
     else if ((startPos & blackKing) != 0) moves &= ~(blackPieces); // Remove friendly pieces from attack options
