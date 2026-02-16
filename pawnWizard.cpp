@@ -281,9 +281,8 @@ unsigned long int pawnWizard::pawnMovePseudoLegal(const int fromIndex) {
 
     unsigned long int startPos = 1ULL << fromIndex;
 
-    if ((startPos & ~(whitePawns | blackPawns)) != 0) {
-        throw std::invalid_argument("fromIndex not occupied by pawn.");
-    }
+    if ((startPos & ~(whitePawns | blackPawns)) != 0) throw std::invalid_argument("fromIndex not occupied by pawn.");
+    if (((startPos & whitePawns) != 0 && !whiteToMove) || ((startPos & blackPawns) != 0 && whiteToMove)) throw std::invalid_argument("fromIndex occupied by wrong color.");
 
     unsigned long int moves = 0;
 
@@ -325,6 +324,7 @@ unsigned long int pawnWizard::knightMovePseudoLegal(const int fromIndex) {
     unsigned long int startPos = 1ULL << fromIndex;
 
     if ((startPos & ~(whiteKnights | blackKnights)) != 0) throw std::invalid_argument("fromIndex not occupied by knight.");
+    if (((startPos & whiteKnights) != 0 && !whiteToMove) || ((startPos & blackKnights) != 0 && whiteToMove)) throw std::invalid_argument("fromIndex occupied by wrong color.");
 
     unsigned long int moves = 0; // Will store possible moves.
 
@@ -369,11 +369,12 @@ unsigned long int pawnWizard::kingMovePseudoLegal(const int fromIndex) {
     if ((whiteRooks & ~(WHITE_ROOKS_START & H_FILE)) != 0) whiteCastleEast = false;
     if ((whiteRooks & ~(WHITE_ROOKS_START & A_FILE)) != 0) whiteCastleWest = false;
     if ((blackRooks & ~(BLACK_ROOKS_START & H_FILE)) != 0) blackCastleEast = false;
-    if ((blackRooks & ~(BLACK_ROOKS_START & A_FILE)) != 0) whiteCastleWest = false;
+    if ((blackRooks & ~(BLACK_ROOKS_START & A_FILE)) != 0) blackCastleWest = false;
 
     unsigned long int startPos = 1ULL << fromIndex;
 
     if ((startPos & ~(whiteKing | blackKing)) != 0) throw std::invalid_argument("fromIndex not occupied by king.");
+    if (((startPos & whiteKing) != 0 && !whiteToMove) || ((startPos & blackKing) != 0 && whiteToMove)) throw std::invalid_argument("fromIndex occupied by wrong color.");
 
     unsigned long int moves = 0;
 
