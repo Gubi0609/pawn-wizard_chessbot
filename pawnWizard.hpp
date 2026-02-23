@@ -55,7 +55,9 @@ public:
 
     // Legal move functions
     unsigned long int pawnMovePseudoLegal(const int fromIndex);
+    unsigned long int knightLookupTableGeneration(const int fromIndex);
     unsigned long int knightMovePseudoLegal(const int fromIndex);
+    unsigned long int kingLookupTableGeneration(const int fromIndex);
     unsigned long int kingMovePseudoLegal(const int fromIndex);
 
 protected:
@@ -74,6 +76,9 @@ protected:
     unsigned long int blackKing = BLACK_KING_START;
     unsigned long int blackQueens = BLACK_QUEEN_START;
     unsigned long int blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
+
+    unsigned long int knightLookupTable[64];
+    unsigned long int kingLookupTable[64];
 
     unsigned long int enPassant = 0x0000000000000000;
     bool whiteCastleWest = true;

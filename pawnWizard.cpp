@@ -3,7 +3,19 @@
 
 #include "pawnWizard.hpp"
 
-pawnWizard::pawnWizard() {}
+pawnWizard::pawnWizard() {
+
+    // Generate knight movement lookup table
+    for (int i = 0; i <= 63; i++) {
+        knightLookupTable[i] = knightLookupTableGeneration(i);
+    }
+
+    // Generate king movement lookup table
+    for (int i = 0; i <= 63; i++) {
+        kingLookupTable[i] = kingLookupTableGeneration(i);
+    }
+
+}
 
 pawnWizard::~pawnWizard() {}
 
@@ -396,20 +408,15 @@ unsigned long int pawnWizard::pawnMovePseudoLegal(const int fromIndex) {
     return moves;
 }
 
-unsigned long int pawnWizard::knightMovePseudoLegal(const int fromIndex) {
+unsigned long int pawnWizard::knightLookupTableGeneration(const int fromIndex) {
     /*
-    Generates all possible pseudo legal moves for a knight at position fromIndex.
+    Generates all possible moves for a knight at position fromIndex.
     :param fromIndex: The bit indexed (0-63) square to move from.
     :return: unsigned long int with a binary value corresponding to the moveable squares.
     */
 
     unsigned long int startPos = 1ULL << fromIndex;
-
-    if ((startPos & ~(whiteKnights | blackKnights)) != 0) throw std::invalid_argument("fromIndex not occupied by knight.");
-    if (((startPos & whiteKnights) != 0 && !whiteToMove) || ((startPos & blackKnights) != 0 && whiteToMove)) throw std::invalid_argument("fromIndex occupied by wrong color.");
-
     unsigned long int moves = 0; // Will store possible moves.
-
 
     if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_7)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 15; // Move 2 up and 1 left
     if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(B_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 6; // Move 1 up and 2 left
@@ -420,8 +427,50 @@ unsigned long int pawnWizard::knightMovePseudoLegal(const int fromIndex) {
     if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_2)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 15; // Move 2 down and 1 right
     if ((startPos & ~(H_FILE)) != 0 && (startPos & ~(G_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 6; // Move 1 down and 2 right
 
+    return moves;
+
+}
+
+unsigned long int pawnWizard::knightMovePseudoLegal(const int fromIndex) {
+    /*
+    Generates all pseudo legal moves for a knight at position fromIndex.
+    :param fromIndex: The bit indexed (0-63) square to move from.
+    :return: unsigned long int with a binary value corresponding to the moveable squares.
+    */
+
+    unsigned long int startPos = 1ULL << fromIndex;
+
+    if ((startPos & ~(whiteKnights | blackKnights)) != 0) throw std::invalid_argument("fromIndex not occupied by knight.");
+    if (((startPos & whiteKnights) != 0 && !whiteToMove) || ((startPos & blackKnights) != 0 && whiteToMove)) throw std::invalid_argument("fromIndex occupied by wrong color.");
+
+    unsigned long int moves = knightLookupTable[fromIndex]; // Possible moves for that position.
+
     if ((startPos & whiteKnights) != 0) moves &= ~(whitePieces); // Remove friendly pieces from attack options
     else if ((startPos & blackKnights) != 0) moves &= ~(blackPieces); // Remove friendly pieces from attack options
+
+    return moves;
+
+}
+
+unsigned long int pawnWizard::kingLookupTableGeneration(const int fromIndex) {
+    /*
+    Generates all possible moves for a king at position fromIndex. This does not account for castling.
+    :param fromIndex: The bit indexed (0-63) square to move from.
+    :return: unsigned long int with a binary value corresponding to the moveable squares.
+    */
+
+    unsigned long int startPos = 1ULL << fromIndex;
+    unsigned long int moves = 0;
+
+    if((startPos & ~(A_FILE)) != 0) moves |= startPos >> 1; // Move west
+    if((startPos & ~(H_FILE)) != 0) moves |= startPos << 1; // Move east
+    if((startPos & ~(ROW_1)) != 0) moves |= startPos >> 8; // Move south
+    if((startPos & ~(ROW_8)) != 0) moves |= startPos << 8; // Move north
+    
+    if((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 9; // Move south east
+    if((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 7; // Move north east
+    if((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 7; // Move south west
+    if((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 9; // Move south east
 
     return moves;
 
@@ -433,9 +482,6 @@ unsigned long int pawnWizard::kingMovePseudoLegal(const int fromIndex) {
     :param fromIndex: The bit indexed (0-63) square to move from.
     :return: unsigned long int with a binary value corresponding to the moveable squares.
     */
-
-    // TODO
-    // - Testing
 
     // If king has moved, disable castling
     if ((whiteKing & ~(WHITE_KING_START)) != 0) {
@@ -454,21 +500,10 @@ unsigned long int pawnWizard::kingMovePseudoLegal(const int fromIndex) {
     if ((blackRooks & ~(BLACK_ROOKS_START & A_FILE)) != 0) blackCastleWest = false;
 
     unsigned long int startPos = 1ULL << fromIndex;
+        unsigned long int moves = kingLookupTable[fromIndex]; // Pre generated movement mask
 
     if ((startPos & ~(whiteKing | blackKing)) != 0) throw std::invalid_argument("fromIndex not occupied by king.");
     if (((startPos & whiteKing) != 0 && !whiteToMove) || ((startPos & blackKing) != 0 && whiteToMove)) throw std::invalid_argument("fromIndex occupied by wrong color.");
-
-    unsigned long int moves = 0;
-
-    if((startPos & ~(A_FILE)) != 0) moves |= startPos >> 1; // Move west
-    if((startPos & ~(H_FILE)) != 0) moves |= startPos << 1; // Move east
-    if((startPos & ~(ROW_1)) != 0) moves |= startPos >> 8; // Move south
-    if((startPos & ~(ROW_8)) != 0) moves |= startPos << 8; // Move north
-    
-    if((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 9; // Move south east
-    if((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 7; // Move north east
-    if((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_1)) != 0) moves |= startPos >> 7; // Move south west
-    if((startPos & ~(H_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 9; // Move south east
 
     if((startPos & whiteKing) != 0 && whiteCastleEast && ((whitePieces | blackPieces) & ~(ROW_1 & F_FILE & G_FILE)) != 0) moves |= 1ULL << 7; // If able to castle (castleEast true and no block), castle
     if((startPos & whiteKing) != 0 && whiteCastleWest && ((whitePieces | blackPieces) & ~(ROW_1 & B_FILE & C_FILE & D_FILE)) != 0) moves |= 1ULL << 3; // If able to castle (castleWest true and no block), castle
