@@ -268,7 +268,7 @@ void pawnWizard::movePiece(const int fromIndex, const int toIndex) {
     === SLIDING PIECE FUNCTIONS ===
 */
 
-unsigned long int pawnWizard::rookOccupancyRay(const int fromIndex) {
+unsigned long int pawnWizard::rookRay(const int fromIndex) {
     /*
     Generates the rook movement ray on a given square not taking into account blocking pieces.
     :param fromIndex: The bit indexed (0-63) square to move from.
@@ -297,7 +297,7 @@ unsigned long int pawnWizard::rookOccupancyRay(const int fromIndex) {
 
 }
 
-unsigned long int pawnWizard::bishopOccupancyRay(const int fromIndex) {
+unsigned long int pawnWizard::bishopRay(const int fromIndex) {
     /*
     Generates the bishop movement ray on a given square not taking into account blocking pieces.
     :param fromIndex: The bit indexed (0-63) square to move from.
