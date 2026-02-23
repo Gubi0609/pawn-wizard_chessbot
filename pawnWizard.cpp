@@ -270,7 +270,7 @@ void pawnWizard::movePiece(const int fromIndex, const int toIndex) {
 
 unsigned long int pawnWizard::rookOccupancyRay(const int fromIndex) {
     /*
-    Generates the movement ray on a given square not taking into account blocking pieces.
+    Generates the rook movement ray on a given square not taking into account blocking pieces.
     :param fromIndex: The bit indexed (0-63) square to move from.
     :return: unsigned long int with a binary value corresponding to the movement ray.
     */
@@ -295,6 +295,54 @@ unsigned long int pawnWizard::rookOccupancyRay(const int fromIndex) {
 
     return movementRay;
 
+}
+
+unsigned long int pawnWizard::bishopOccupancyRay(const int fromIndex) {
+    /*
+    Generates the bishop movement ray on a given square not taking into account blocking pieces.
+    :param fromIndex: The bit indexed (0-63) square to move from.
+    :return: unsigned long int with a binary value corresponding to the movement ray.
+    */
+
+    unsigned long int startPos = 1ULL << fromIndex;
+    unsigned long int currentPos = startPos;
+
+    unsigned long int movementRay = 0;
+
+    // While not on h file or row 8, move north east
+    while ((currentPos & ~(H_FILE)) != 0 && (currentPos & ~(ROW_8)) != 0) {
+        currentPos <<= 9;
+        movementRay |= currentPos;
+    }
+
+    currentPos = startPos;
+
+    // While not on h file or row 1, move south east
+    while ((currentPos & ~(H_FILE)) != 0 && (currentPos & ~(ROW_1)) != 0) {
+        currentPos >>= 7;
+        movementRay |= currentPos;
+    }
+
+    currentPos = startPos;
+
+    // While not on a file or row 1, move south west
+        while ((currentPos & ~(A_FILE)) != 0 && (currentPos & ~(ROW_1)) != 0) {
+        currentPos >>= 9;
+        movementRay |= currentPos;
+    }
+
+    currentPos = startPos;
+
+    // While not on a file or row 8, move north west
+        while ((currentPos & ~(A_FILE)) != 0 && (currentPos & ~(ROW_8)) != 0) {
+        currentPos <<= 7;
+        movementRay |= currentPos;
+    }
+
+    // Remove edges from movementRay to allign with needs for magic bitboard
+    movementRay &= ~(A_FILE | H_FILE | ROW_1 | ROW_8);
+
+    return movementRay;
 }
 
 

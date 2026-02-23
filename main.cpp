@@ -26,7 +26,7 @@ int main() {
     // chessbot.movePiece(36, 36+8);
     // chessbot.printBoard();
 
-    chessbot.printSingleBitBoard(chessbot.rookOccupancyRay(3));
+    chessbot.printSingleBitBoard(chessbot.bishopOccupancyRay(9));
 
     return 0;
 }
