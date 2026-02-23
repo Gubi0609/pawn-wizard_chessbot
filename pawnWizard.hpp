@@ -46,6 +46,7 @@ public:
     void printBoard();
     void printSingleBitBoard(const unsigned long int &board);
     int uci2index(const char* uci);
+    char* index2uci(const int index);
     void movePieceByType(const char pieceType, const int fromIndex, const int toIndex);
     void movePiece(const int fromIndex, const int toIndex);
 

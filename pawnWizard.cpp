@@ -122,6 +122,26 @@ int pawnWizard::uci2index(const char* uci) {
     return bitIndex;
 }
 
+char* pawnWizard::index2uci(const int index) {
+    /*
+    Function to convert from bit index to UCI square (e.g. a2).
+    :param index: The bit indexed (0-63) square to convert.
+    :return: The UCI square.
+    */
+
+    int row = index / 8;
+    int file = index % 8;
+
+    static char uci[3];
+
+    uci[0] = 'a' + file;
+    uci[1] = '1' + row;
+    uci[2] = '\0';
+
+    return uci;
+
+}
+
 void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, const int toIndex) {
     /*
     Function that moves a piece from one square to another
