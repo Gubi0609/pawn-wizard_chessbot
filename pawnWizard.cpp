@@ -265,6 +265,40 @@ void pawnWizard::movePiece(const int fromIndex, const int toIndex) {
 }
 
 /*
+    === SLIDING PIECE FUNCTIONS ===
+*/
+
+unsigned long int pawnWizard::rookOccupancyRay(const int fromIndex) {
+    /*
+    Generates the movement ray on a given square not taking into account blocking pieces.
+    :param fromIndex: The bit indexed (0-63) square to move from.
+    :return: unsigned long int with a binary value corresponding to the movement ray.
+    */
+
+    unsigned long int startPos = 1ULL << fromIndex;
+    unsigned long int movementRay = 0;
+
+    const int row = fromIndex / 8; // Calculate the relevant row
+    const int file = fromIndex % 8; // Calcualte the relevant file
+
+    // Shift the A file and Row 1 to match with the relevant file and row and add to movementRay
+    movementRay |= (A_FILE << file) | (ROW_1 << 8*row);
+
+    // Remove start position from movementRay
+    movementRay &= ~(startPos);
+
+    // Remove edges from movementRay to allign with needs for magic bitboard
+    if ((startPos & ~(A_FILE)) != 0) movementRay &= ~(A_FILE);
+    if ((startPos & ~(H_FILE)) != 0) movementRay &= ~(H_FILE);
+    if ((startPos & ~(ROW_1)) != 0) movementRay &= ~(ROW_1);
+    if ((startPos & ~(ROW_8)) != 0) movementRay &= ~(ROW_8);
+
+    return movementRay;
+
+}
+
+
+/*
     === LEGAL MOVE FUNCTIONS ===
 */
 

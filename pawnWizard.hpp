@@ -49,6 +49,9 @@ public:
     void movePieceByType(const char pieceType, const int fromIndex, const int toIndex);
     void movePiece(const int fromIndex, const int toIndex);
 
+    // Sliding piece functions
+    unsigned long int rookOccupancyRay(const int fromIndex);
+
     // Legal move functions
     unsigned long int pawnMovePseudoLegal(const int fromIndex);
     unsigned long int knightMovePseudoLegal(const int fromIndex);
