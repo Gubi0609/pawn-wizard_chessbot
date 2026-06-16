@@ -129,14 +129,15 @@ std::string pawnWizard::index2uci(const int index) {
     :return: The UCI square.
     */
 
+    if (index < 0 || index > 63) return "";
+
     int row = index / 8;
     int file = index % 8;
 
-    static char uci[3];
+    std::string uci = "a0"; // Placeholder to initiate size
 
     uci[0] = 'a' + file;
     uci[1] = '1' + row;
-    uci[2] = '\0';
 
     return uci;
 
@@ -520,7 +521,7 @@ unsigned long int pawnWizard::kingMovePseudoLegal(const int fromIndex) {
     if ((blackRooks & ~(BLACK_ROOKS_START & A_FILE)) != 0) blackCastleWest = false;
 
     unsigned long int startPos = 1ULL << fromIndex;
-        unsigned long int moves = kingLookupTable[fromIndex]; // Pre generated movement mask
+    unsigned long int moves = kingLookupTable[fromIndex]; // Pre generated movement mask
 
     if ((startPos & ~(whiteKing | blackKing)) != 0) throw std::invalid_argument("fromIndex not occupied by king.");
     if (((startPos & whiteKing) != 0 && !whiteToMove) || ((startPos & blackKing) != 0 && whiteToMove)) throw std::invalid_argument("fromIndex occupied by wrong color.");

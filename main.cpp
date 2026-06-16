@@ -26,7 +26,13 @@ int main() {
     // chessbot.movePiece(36, 36+8);
     // chessbot.printBoard();
 
-    chessbot.printSingleBitBoard(chessbot.bishopRay(9));
+    // chessbot.printSingleBitBoard(chessbot.bishopRay(9));
+
+    int index = chessbot.uci2index("a2");
+    std::string square = chessbot.index2uci(index);
+
+    std::cout << index << " " << square << std::endl;
+
 
     return 0;
 }
