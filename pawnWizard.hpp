@@ -1,3 +1,8 @@
+#ifndef PAWNWIZARD_HPP
+#define PAWNWIZARD_HPP
+
+#include <string>
+
 // Definition of all files (a - h) as unsigned long int
 #define A_FILE 0x0101010101010101ULL
 #define B_FILE 0x0202020202020202ULL
@@ -45,8 +50,8 @@ public:
     unsigned long int& getBitboardByType(const char pieceType);
     void printBoard();
     void printSingleBitBoard(const unsigned long int &board);
-    int uci2index(const char* uci);
-    char* index2uci(const int index);
+    int uci2index(const std::string uci);
+    std::string index2uci(const int index);
     void movePieceByType(const char pieceType, const int fromIndex, const int toIndex);
     void movePiece(const int fromIndex, const int toIndex);
 
@@ -90,3 +95,5 @@ protected:
     bool whiteToMove = true;
     
 };
+
+#endif

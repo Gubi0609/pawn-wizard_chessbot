@@ -107,7 +107,7 @@ void pawnWizard::printSingleBitBoard(const unsigned long int &board) {
     std::cout << "\n";
 }
 
-int pawnWizard::uci2index(const char* uci) {
+int pawnWizard::uci2index(const std::string uci) {
     /*
     Function to convert from UCI square (e.g. a2) to bit index.
     :param uci: The UCI square to convert.
@@ -122,7 +122,7 @@ int pawnWizard::uci2index(const char* uci) {
     return bitIndex;
 }
 
-char* pawnWizard::index2uci(const int index) {
+std::string pawnWizard::index2uci(const int index) {
     /*
     Function to convert from bit index to UCI square (e.g. a2).
     :param index: The bit indexed (0-63) square to convert.
