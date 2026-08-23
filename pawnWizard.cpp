@@ -23,7 +23,7 @@ char pawnWizard::getPieceAtSquare(const int index) {
     :return: A char representing the piece. lowercase is black, uppercase is white.
     */
 
-    unsigned long int mask = 1ULL << index;
+    uint64_t mask = 1ULL << index;
 
     if (whitePawns & mask) return 'P';
     if (whiteKnights & mask) return 'N';
@@ -42,7 +42,7 @@ char pawnWizard::getPieceAtSquare(const int index) {
     return '.'; // Empty square
 }
 
-unsigned long int& pawnWizard::getBitboardByType(const char pieceType) {
+uint64_t& pawnWizard::getBitboardByType(const char pieceType) {
     /*
     Function to get the corresponding bitboard for a type of piece.
     :param pieceType: The type of piece represented by a char. Lowercase for black, uppercase for white.
@@ -84,7 +84,7 @@ void pawnWizard::printBoard() {
     std::cout << "   a b c d e f g h\n";
 }
 
-void pawnWizard::printSingleBitBoard(const unsigned long int &board) {
+void pawnWizard::printSingleBitBoard(const uint64_t &board) {
     /*
     Helper function to print a single piece-board to terminal.
     */
@@ -147,8 +147,8 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     // - Move rook if castling
 
     char pieceAtToSquare = getPieceAtSquare(toIndex);
-    unsigned long int& bitboard = getBitboardByType(pieceType);
-    unsigned long int startPos = 1ULL << fromIndex;
+    uint64_t& bitboard = getBitboardByType(pieceType);
+    uint64_t startPos = 1ULL << fromIndex;
 
     if ((!whiteToMove && (((1ULL << fromIndex) & whitePieces) != 0)) || (whiteToMove && (((1ULL << fromIndex) & blackPieces) != 0))) {
         throw std::invalid_argument("fromIndex occupied by enemy piece.");
@@ -157,7 +157,7 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
         throw std::invalid_argument("toIndex occupied by friendly piece.");
     }
 
-    unsigned long int movementMask = 0;
+    uint64_t movementMask = 0;
 
     switch (pieceType) {
         case 'p':
@@ -293,15 +293,15 @@ void pawnWizard::movePiece(const int fromIndex, const int toIndex) {
     === SLIDING PIECE FUNCTIONS ===
 */
 
-unsigned long int pawnWizard::rookRay(const int fromIndex) {
+uint64_t pawnWizard::rookRay(const int fromIndex) {
     /*
     Generates the rook movement ray on a given square not taking into account blocking pieces.
     :param fromIndex: The bit indexed (0-63) square to move from.
-    :return: unsigned long int with a binary value corresponding to the movement ray.
+    :return: uint64_t with a binary value corresponding to the movement ray.
     */
 
-    unsigned long int startPos = 1ULL << fromIndex;
-    unsigned long int movementRay = 0;
+    uint64_t startPos = 1ULL << fromIndex;
+    uint64_t movementRay = 0;
 
     const int row = fromIndex / 8; // Calculate the relevant row
     const int file = fromIndex % 8; // Calcualte the relevant file
@@ -322,17 +322,17 @@ unsigned long int pawnWizard::rookRay(const int fromIndex) {
 
 }
 
-unsigned long int pawnWizard::bishopRay(const int fromIndex) {
+uint64_t pawnWizard::bishopRay(const int fromIndex) {
     /*
     Generates the bishop movement ray on a given square not taking into account blocking pieces.
     :param fromIndex: The bit indexed (0-63) square to move from.
-    :return: unsigned long int with a binary value corresponding to the movement ray.
+    :return: uint64_t with a binary value corresponding to the movement ray.
     */
 
-    unsigned long int startPos = 1ULL << fromIndex;
-    unsigned long int currentPos = startPos;
+    uint64_t startPos = 1ULL << fromIndex;
+    uint64_t currentPos = startPos;
 
-    unsigned long int movementRay = 0;
+    uint64_t movementRay = 0;
 
     // While not on h file or row 8, move north east
     while ((currentPos & ~(H_FILE)) != 0 && (currentPos & ~(ROW_8)) != 0) {
@@ -370,7 +370,7 @@ unsigned long int pawnWizard::bishopRay(const int fromIndex) {
     return movementRay;
 }
 
-unsigned long int pawnWizard::getRelevantOccupancy(const unsigned long int movementRay, const unsigned long int occupancy) {
+uint64_t pawnWizard::getRelevantOccupancy(const uint64_t movementRay, const uint64_t occupancy) {
     /*
     Masks the occupied squares to only include those alligning with the movement ray.
     :param movementRay: The mask of movable squares a sliding piece (rook or bishop) can make.
@@ -382,15 +382,129 @@ unsigned long int pawnWizard::getRelevantOccupancy(const unsigned long int movem
 
 }
 
+uint64_t pawnWizard::walkRookRay(const int fromIndex, const uint64_t occupancy) {
+    /*
+    Slow attack ray generation for rook at fromIndex with occupied pieces on ray at occupancy.
+    :param fromIndex: The square index, that the moving piece is on.
+    :param occupancy: Masked occupancy squares, that allign with movementRay
+    :return: Attack ray for occupancy pattern.
+    */
+
+    uint64_t startPos = 1ULL << fromIndex;
+    uint64_t attacks = 0;
+
+    uint64_t currentPos = startPos;
+
+    // Iterate NORTH and check for occupancy
+    while((currentPos & ~(ROW_8)) != 0) {
+        if ((currentPos & occupancy) != 0) {
+            currentPos <<= 8;
+            attacks |= currentPos;
+        } else break;
+    }
+
+    currentPos = startPos;
+
+    // Iterate SOUTH and check for occupancy
+    while((currentPos & ~(ROW_1)) != 0) {
+        if ((currentPos & occupancy) != 0) {
+            currentPos >>= 8;
+            attacks |= currentPos;
+        } else break;
+    }
+
+    currentPos = startPos;
+
+    // Iterate EAST and check for occupancy
+    while((currentPos & ~(H_FILE)) != 0) {
+        if ((currentPos & occupancy) != 0) {
+            currentPos << 1;
+            attacks |= currentPos;
+        } else break;
+    }
+
+    currentPos = startPos;
+    
+    // Iterate WEST and check for occupancy
+    while((currentPos & ~(A_FILE)) != 0) {
+        if ((currentPos & currentPos) != 0) {
+            currentPos >> 1;
+            attacks |= currentPos;
+        } else break;
+    }
+
+    return attacks;
+}
+
+uint64_t pawnWizard::walkBishopRay(const int fromIndex, const uint64_t occupancy) {
+     /*
+    Slow attack ray generation for bishop at fromIndex with occupied pieces on ray at occupancy.
+    :param fromIndex: The square index, that the moving piece is on.
+    :param occupancy: Masked occupancy squares, that allign with movementRay
+    :return: Attack ray for occupancy pattern.
+    */
+
+    uint64_t startPos = 1ULL << fromIndex;
+    uint64_t attacks = 0;
+
+    uint64_t currentPos = startPos;
+
+    // Walk NORT EAST and check for occupancy
+    while ((currentPos & ~(H_FILE)) != 0 && (currentPos & ~(ROW_8)) != 0) {
+        if ((currentPos & occupancy) != 0) {
+            currentPos <<= 9;
+            attacks |= currentPos;
+        } else break;
+    }
+
+    currentPos = startPos;
+
+    // Walk SOUTH EAST and check for occupancy
+    while ((currentPos & ~(H_FILE)) != 0 && (currentPos & ~(ROW_1)) != 0) {
+        if ((currentPos & occupancy) != 0) {
+            currentPos >>= 7;
+            attacks |= currentPos;
+        } else break;
+    }
+
+    currentPos = startPos;
+
+    // Walk SOUT WEST and check for occupancy
+    while ((currentPos & ~(A_FILE)) != 0 && (currentPos & ~(ROW_1)) != 0) {
+        if ((currentPos & occupancy) != 0) {
+            currentPos >>= 9;
+            attacks |= currentPos;
+        } else break;
+    }
+
+    currentPos = startPos;
+
+    // Walk NORT WEST and check for occupancy
+    while ((currentPos & ~(A_FILE)) != 0 && (currentPos & ~(ROW_8)) != 0) {
+        if ((currentPos & occupancy) != 0) {
+            currentPos <<= 7;
+            attacks |= currentPos;
+        } else break;
+    }
+
+    return attacks;
+}
+
 /*
     === MAGIC BITBOARDS INIT ===
 */
 
 void pawnWizard::initRookShifts() {
+    /*
+    Initialize table holding rook shifts for each square. To be used in magic bitboard generation and retrieval.
+    */
+
     for(int square = 0; square < 64; square++) {
         
-        unsigned long int movmentRay = rookRay(square);
+        // Get possible movement ray (excluding edges) for square
+        uint64_t movmentRay = rookRay(square);
 
+        // Count number of set bits (1's) in movement ray and calculate shift
         int n = std::__popcount(movmentRay);
         int shift = 64 - n;
 
@@ -399,15 +513,29 @@ void pawnWizard::initRookShifts() {
 }
 
 void pawnWizard::initBishopShifts() {
+    /*
+    Initialize table holding bishop shifts for each square. To be used in magic bitboard generation and retrieval.
+    */
+
     for(int square = 0; square < 64; square++) {
         
-        unsigned long int movementRay = bishopRay(square);
+        // Get possible movement ray (excluding edges) for square
+        uint64_t movementRay = bishopRay(square);
 
+        // Count number of set bits (1's) in movement ray and calculate shift
         int n = std::__popcount(movementRay);
         int shift = 64 - n;
 
         bishopShifts[square] = shift;
     }
+}
+
+void pawnWizard::initRookTable() {
+
+}
+
+void pawnWizard::initBishopTable() {
+
 }
 
 /*
@@ -432,23 +560,23 @@ void pawnWizard::initKingTable() {
     === LEGAL MOVE FUNCTIONS ===
 */
 
-unsigned long int pawnWizard::pawnMovePseudoLegal(const int fromIndex) {
+uint64_t pawnWizard::pawnMovePseudoLegal(const int fromIndex) {
     /*
     Generates all possible psuedo legal moves for a pawn at position fromIndex.
     :param fromIndex: The bit indexed (0-63) square to move from.
-    :return: unsigned long int with a binary value corresponding to the moveable squares.
+    :return: uint64_t with a binary value corresponding to the moveable squares.
     */
 
     // TODO: 
     // - Promotion
 
 
-    unsigned long int startPos = 1ULL << fromIndex;
+    uint64_t startPos = 1ULL << fromIndex;
 
     if ((startPos & ~(whitePawns | blackPawns)) != 0) throw std::invalid_argument("fromIndex not occupied by pawn.");
     if (((startPos & whitePawns) != 0 && !whiteToMove) || ((startPos & blackPawns) != 0 && whiteToMove)) throw std::invalid_argument("fromIndex occupied by wrong color.");
 
-    unsigned long int moves = 0;
+    uint64_t moves = 0;
 
     if ((startPos & whitePawns) != 0) {
         if (((startPos << 8) & ~(whitePieces | blackPieces)) != 0) moves |= startPos << 8; // Can't push forward into other piece
@@ -478,15 +606,15 @@ unsigned long int pawnWizard::pawnMovePseudoLegal(const int fromIndex) {
     return moves;
 }
 
-unsigned long int pawnWizard::knightLookupTableGeneration(const int fromIndex) {
+uint64_t pawnWizard::knightLookupTableGeneration(const int fromIndex) {
     /*
     Generates all possible moves for a knight at position fromIndex.
     :param fromIndex: The bit indexed (0-63) square to move from.
-    :return: unsigned long int with a binary value corresponding to the moveable squares.
+    :return: uint64_t with a binary value corresponding to the moveable squares.
     */
 
-    unsigned long int startPos = 1ULL << fromIndex;
-    unsigned long int moves = 0; // Will store possible moves.
+    uint64_t startPos = 1ULL << fromIndex;
+    uint64_t moves = 0; // Will store possible moves.
 
     if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(ROW_7)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 15; // Move 2 up and 1 left
     if ((startPos & ~(A_FILE)) != 0 && (startPos & ~(B_FILE)) != 0 && (startPos & ~(ROW_8)) != 0) moves |= startPos << 6; // Move 1 up and 2 left
@@ -501,19 +629,19 @@ unsigned long int pawnWizard::knightLookupTableGeneration(const int fromIndex) {
 
 }
 
-unsigned long int pawnWizard::knightMovePseudoLegal(const int fromIndex) {
+uint64_t pawnWizard::knightMovePseudoLegal(const int fromIndex) {
     /*
     Generates all pseudo legal moves for a knight at position fromIndex.
     :param fromIndex: The bit indexed (0-63) square to move from.
-    :return: unsigned long int with a binary value corresponding to the moveable squares.
+    :return: uint64_t with a binary value corresponding to the moveable squares.
     */
 
-    unsigned long int startPos = 1ULL << fromIndex;
+    uint64_t startPos = 1ULL << fromIndex;
 
     if ((startPos & ~(whiteKnights | blackKnights)) != 0) throw std::invalid_argument("fromIndex not occupied by knight.");
     if (((startPos & whiteKnights) != 0 && !whiteToMove) || ((startPos & blackKnights) != 0 && whiteToMove)) throw std::invalid_argument("fromIndex occupied by wrong color.");
 
-    unsigned long int moves = knightLookupTable[fromIndex]; // Possible moves for that position.
+    uint64_t moves = knightLookupTable[fromIndex]; // Possible moves for that position.
 
     if ((startPos & whiteKnights) != 0) moves &= ~(whitePieces); // Remove friendly pieces from attack options
     else if ((startPos & blackKnights) != 0) moves &= ~(blackPieces); // Remove friendly pieces from attack options
@@ -522,15 +650,15 @@ unsigned long int pawnWizard::knightMovePseudoLegal(const int fromIndex) {
 
 }
 
-unsigned long int pawnWizard::kingLookupTableGeneration(const int fromIndex) {
+uint64_t pawnWizard::kingLookupTableGeneration(const int fromIndex) {
     /*
     Generates all possible moves for a king at position fromIndex. This does not account for castling.
     :param fromIndex: The bit indexed (0-63) square to move from.
-    :return: unsigned long int with a binary value corresponding to the moveable squares.
+    :return: uint64_t with a binary value corresponding to the moveable squares.
     */
 
-    unsigned long int startPos = 1ULL << fromIndex;
-    unsigned long int moves = 0;
+    uint64_t startPos = 1ULL << fromIndex;
+    uint64_t moves = 0;
 
     if((startPos & ~(A_FILE)) != 0) moves |= startPos >> 1; // Move west
     if((startPos & ~(H_FILE)) != 0) moves |= startPos << 1; // Move east
@@ -546,11 +674,11 @@ unsigned long int pawnWizard::kingLookupTableGeneration(const int fromIndex) {
 
 }
 
-unsigned long int pawnWizard::kingMovePseudoLegal(const int fromIndex) {
+uint64_t pawnWizard::kingMovePseudoLegal(const int fromIndex) {
     /*
     Generates all possible pseudo legal moves for a king at position fromIndex.
     :param fromIndex: The bit indexed (0-63) square to move from.
-    :return: unsigned long int with a binary value corresponding to the moveable squares.
+    :return: uint64_t with a binary value corresponding to the moveable squares.
     */
 
     // If king has moved, disable castling
@@ -569,8 +697,8 @@ unsigned long int pawnWizard::kingMovePseudoLegal(const int fromIndex) {
     if ((blackRooks & ~(BLACK_ROOKS_START & H_FILE)) != 0) blackCastleEast = false;
     if ((blackRooks & ~(BLACK_ROOKS_START & A_FILE)) != 0) blackCastleWest = false;
 
-    unsigned long int startPos = 1ULL << fromIndex;
-    unsigned long int moves = kingLookupTable[fromIndex]; // Pre generated movement mask
+    uint64_t startPos = 1ULL << fromIndex;
+    uint64_t moves = kingLookupTable[fromIndex]; // Pre generated movement mask
 
     if ((startPos & ~(whiteKing | blackKing)) != 0) throw std::invalid_argument("fromIndex not occupied by king.");
     if (((startPos & whiteKing) != 0 && !whiteToMove) || ((startPos & blackKing) != 0 && whiteToMove)) throw std::invalid_argument("fromIndex occupied by wrong color.");
