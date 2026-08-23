@@ -1,19 +1,11 @@
-#include <iostream>
-#include <stdexcept>
-
 #include "pawnWizard.hpp"
 
 pawnWizard::pawnWizard() {
 
-    // Generate knight movement lookup table
-    for (int i = 0; i <= 63; i++) {
-        knightLookupTable[i] = knightLookupTableGeneration(i);
-    }
-
-    // Generate king movement lookup table
-    for (int i = 0; i <= 63; i++) {
-        kingLookupTable[i] = kingLookupTableGeneration(i);
-    }
+    initKnightTable();
+    initKingTable();
+    initBishopShifts();
+    initRookShifts();
 
 }
 
@@ -390,6 +382,51 @@ unsigned long int pawnWizard::getRelevantOccupancy(const unsigned long int movem
 
 }
 
+/*
+    === MAGIC BITBOARDS INIT ===
+*/
+
+void pawnWizard::initRookShifts() {
+    for(int square = 0; square < 64; square++) {
+        
+        unsigned long int movmentRay = rookRay(square);
+
+        int n = std::__popcount(movmentRay);
+        int shift = 64 - n;
+
+        rookShifts[square] = shift;
+    }
+}
+
+void pawnWizard::initBishopShifts() {
+    for(int square = 0; square < 64; square++) {
+        
+        unsigned long int movementRay = bishopRay(square);
+
+        int n = std::__popcount(movementRay);
+        int shift = 64 - n;
+
+        bishopShifts[square] = shift;
+    }
+}
+
+/*
+    === JUMPING PIECE INIT ==
+*/
+
+void pawnWizard::initKnightTable() {
+    // Generate knight movement lookup table
+    for (int i = 0; i <= 63; i++) {
+        knightLookupTable[i] = knightLookupTableGeneration(i);
+    }
+}
+
+void pawnWizard::initKingTable() {
+    // Generate king movement lookup table
+    for (int i = 0; i <= 63; i++) {
+        kingLookupTable[i] = kingLookupTableGeneration(i);
+    }
+}
 
 /*
     === LEGAL MOVE FUNCTIONS ===

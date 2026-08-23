@@ -2,6 +2,9 @@
 #define PAWNWIZARD_HPP
 
 #include <string>
+#include <bits/stdc++.h> // For popcount
+#include <iostream> // For printing bitboard
+#include <stdexcept> // For throwing exceptions
 
 // Definition of all files (a - h) as unsigned long int
 #define A_FILE 0x0101010101010101ULL
@@ -59,6 +62,18 @@ public:
     unsigned long int rookRay(const int fromIndex);
     unsigned long int bishopRay(const int fromIndex);
     unsigned long int getRelevantOccupancy(const unsigned long int movementRay, const unsigned long int occupancy);
+    unsigned long int walkRookRay(const int fromIndex, const unsigned long int occupancy);
+    unsigned long int walkBishopRay(const int fromIndex, const unsigned long int occupancy);
+
+    // Magic Bitboard init
+    void initRookShifts();
+    void initBishopShifts();
+    void initRookTable();
+    void initBishopTable();
+
+    // Jumping piece init
+    void initKnightTable();
+    void initKingTable();
 
     // Legal move functions
     unsigned long int pawnMovePseudoLegal(const int fromIndex);
@@ -68,6 +83,8 @@ public:
     unsigned long int kingMovePseudoLegal(const int fromIndex);
 
 protected:
+
+    // Initiate white piece placement
     unsigned long int whitePawns = WHITE_PAWNS_START;
     unsigned long int whiteRooks = WHITE_ROOKS_START;
     unsigned long int whiteKnights = WHITE_KNIGHTS_START;
@@ -76,6 +93,7 @@ protected:
     unsigned long int whiteQueens = WHITE_QUEENS_START;
     unsigned long int whitePieces = whitePawns | whiteRooks | whiteKnights | whiteBishops | whiteKing | whiteQueens;
 
+    // Initiate black piece placement
     unsigned long int blackPawns = BLACK_PAWNS_START;
     unsigned long int blackRooks = BLACK_ROOKS_START;
     unsigned long int blackKnights = BLACK_KNIGHTS_START;
@@ -84,16 +102,30 @@ protected:
     unsigned long int blackQueens = BLACK_QUEEN_START;
     unsigned long int blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
 
+    // Lookup tables for jumping pieces
     unsigned long int knightLookupTable[64];
     unsigned long int kingLookupTable[64];
 
+    // Bitboard updated every move to keep track of possible en passant moves
     unsigned long int enPassant = 0x0000000000000000;
+
+    // Biboards to keep track of possible castle for each color
     bool whiteCastleWest = true;
     bool whiteCastleEast = true;
     bool blackCastleWest = true;
     bool blackCastleEast = true;
 
     bool whiteToMove = true;
+
+    /* Used for magic bitboard generation */
+    unsigned long int rookTable[64][4096];
+    unsigned long int bishopTable[64][512];
+
+    unsigned long int rookMagics[64];
+    unsigned long int bishopMagics[64];
+
+    unsigned long int rookShifts[64];
+    unsigned long int bishopShifts[64];
     
 };
 
