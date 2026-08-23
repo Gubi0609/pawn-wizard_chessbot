@@ -63,10 +63,12 @@ public:
     uint64_t rookRay(const int fromIndex);
     uint64_t bishopRay(const int fromIndex);
     uint64_t getRelevantOccupancy(const uint64_t movementRay, const uint64_t occupancy);
-    uint64_t walkRookRay(const int fromIndex, const uint64_t occupancy);
-    uint64_t walkBishopRay(const int fromIndex, const uint64_t occupancy);
+    uint64_t walkRookRay(const int fromIndex, const uint64_t maskedOccupancy);
+    uint64_t walkBishopRay(const int fromIndex, const uint64_t maskedOccupancy);
 
     // Magic Bitboard init
+    void initRookRays();
+    void initBishopRays();
     void initRookShifts();
     void initBishopShifts();
     void initRookTable();
@@ -82,6 +84,8 @@ public:
     uint64_t knightMovePseudoLegal(const int fromIndex);
     uint64_t kingLookupTableGeneration(const int fromIndex);
     uint64_t kingMovePseudoLegal(const int fromIndex);
+    uint64_t rookMovePseudoLegal(const int fromIndex, const uint64_t occupancy);
+    uint64_t bishopkMovePseudoLegal(const int fromIndex, const uint64_t occupancy);
 
 protected:
 
@@ -119,6 +123,9 @@ protected:
     bool whiteToMove = true;
 
     /* Used for magic bitboard generation */
+    uint64_t rookRays[64];
+    uint64_t bishopRays[64];
+
     uint64_t rookTable[64][4096];
     uint64_t bishopTable[64][512];
 
