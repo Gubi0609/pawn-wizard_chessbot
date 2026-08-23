@@ -378,6 +378,18 @@ unsigned long int pawnWizard::bishopRay(const int fromIndex) {
     return movementRay;
 }
 
+unsigned long int pawnWizard::getRelevantOccupancy(const unsigned long int movementRay, const unsigned long int occupancy) {
+    /*
+    Masks the occupied squares to only include those alligning with the movement ray.
+    :param movementRay: The mask of movable squares a sliding piece (rook or bishop) can make.
+    :param occupancy: Occupied squares on the board.
+    :return: Masked occupied squares.
+    */
+
+    return movementRay & occupancy;
+
+}
+
 
 /*
     === LEGAL MOVE FUNCTIONS ===

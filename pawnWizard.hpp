@@ -58,6 +58,7 @@ public:
     // Sliding piece functions
     unsigned long int rookRay(const int fromIndex);
     unsigned long int bishopRay(const int fromIndex);
+    unsigned long int getRelevantOccupancy(const unsigned long int movementRay, const unsigned long int occupancy);
 
     // Legal move functions
     unsigned long int pawnMovePseudoLegal(const int fromIndex);

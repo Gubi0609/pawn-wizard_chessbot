@@ -28,10 +28,13 @@ int main() {
 
     // chessbot.printSingleBitBoard(chessbot.bishopRay(9));
 
-    int index = chessbot.uci2index("a2");
-    std::string square = chessbot.index2uci(index);
+    unsigned long int movementRay = chessbot.rookRay(chessbot.uci2index("e4"));
+    unsigned long int occupancy = 0x08FEAD7E550226A4;
+    unsigned long int maskedOccupancy = chessbot.getRelevantOccupancy(movementRay, occupancy);
 
-    std::cout << index << " " << square << std::endl;
+    chessbot.printSingleBitBoard(movementRay);
+    chessbot.printSingleBitBoard(occupancy);
+    chessbot.printSingleBitBoard(maskedOccupancy);
 
 
     return 0;
