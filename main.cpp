@@ -37,5 +37,9 @@ int main() {
     chessbot.printSingleBitBoard(maskedOccupancy);
 
 
+    uint64_t attacks = chessbot.rookMovePseudoLegal(chessbot.uci2index("e4"), occupancy);
+
+    chessbot.printSingleBitBoard(attacks);
+
     return 0;
 }

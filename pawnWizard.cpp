@@ -403,40 +403,36 @@ uint64_t pawnWizard::walkRookRay(const int fromIndex, const uint64_t maskedOccup
 
     // Iterate NORTH and check for occupancy
     while((currentPos & ~(ROW_8)) != 0) {
-        if ((currentPos & maskedOccupancy) != 0) {
-            currentPos <<= 8;
-            attacks |= currentPos;
-        } else break;
+        currentPos <<= 8;
+        attacks |= currentPos;
+        if ((currentPos & maskedOccupancy) != 0) break;
     }
 
     currentPos = startPos;
 
     // Iterate SOUTH and check for occupancy
     while((currentPos & ~(ROW_1)) != 0) {
-        if ((currentPos & maskedOccupancy) != 0) {
-            currentPos >>= 8;
-            attacks |= currentPos;
-        } else break;
+        currentPos >>= 8;
+        attacks |= currentPos;
+        if ((currentPos & maskedOccupancy) != 0) break;
     }
 
     currentPos = startPos;
 
     // Iterate EAST and check for occupancy
     while((currentPos & ~(H_FILE)) != 0) {
-        if ((currentPos & maskedOccupancy) != 0) {
-            currentPos << 1;
-            attacks |= currentPos;
-        } else break;
+        currentPos <<= 1;
+        attacks |= currentPos;
+        if ((currentPos & maskedOccupancy) != 0) break;
     }
 
     currentPos = startPos;
     
     // Iterate WEST and check for occupancy
     while((currentPos & ~(A_FILE)) != 0) {
-        if ((currentPos & maskedOccupancy) != 0) {
-            currentPos >> 1;
-            attacks |= currentPos;
-        } else break;
+        currentPos >>= 1;
+        attacks |= currentPos;
+        if ((currentPos & maskedOccupancy) != 0) break;
     }
 
     return attacks;
@@ -457,40 +453,36 @@ uint64_t pawnWizard::walkBishopRay(const int fromIndex, const uint64_t maskedOcc
 
     // Walk NORT EAST and check for occupancy
     while ((currentPos & ~(H_FILE)) != 0 && (currentPos & ~(ROW_8)) != 0) {
-        if ((currentPos & maskedOccupancy) != 0) {
-            currentPos <<= 9;
-            attacks |= currentPos;
-        } else break;
+        currentPos <<= 9;
+        attacks |= currentPos;
+        if ((currentPos & maskedOccupancy) != 0) break;
     }
 
     currentPos = startPos;
 
     // Walk SOUTH EAST and check for occupancy
     while ((currentPos & ~(H_FILE)) != 0 && (currentPos & ~(ROW_1)) != 0) {
-        if ((currentPos & maskedOccupancy) != 0) {
-            currentPos >>= 7;
-            attacks |= currentPos;
-        } else break;
+        currentPos >>= 7;
+        attacks |= currentPos;
+        if ((currentPos & maskedOccupancy) != 0) break;
     }
 
     currentPos = startPos;
 
     // Walk SOUT WEST and check for occupancy
     while ((currentPos & ~(A_FILE)) != 0 && (currentPos & ~(ROW_1)) != 0) {
-        if ((currentPos & maskedOccupancy) != 0) {
-            currentPos >>= 9;
-            attacks |= currentPos;
-        } else break;
+        currentPos >>= 9;
+        attacks |= currentPos;
+        if ((currentPos & maskedOccupancy) != 0) break;
     }
 
     currentPos = startPos;
 
     // Walk NORT WEST and check for occupancy
     while ((currentPos & ~(A_FILE)) != 0 && (currentPos & ~(ROW_8)) != 0) {
-        if ((currentPos & maskedOccupancy) != 0) {
-            currentPos <<= 7;
-            attacks |= currentPos;
-        } else break;
+        currentPos <<= 7;
+        attacks |= currentPos;
+        if ((currentPos & maskedOccupancy) != 0) break;
     }
 
     return attacks;
@@ -563,7 +555,7 @@ void pawnWizard::initRookTable() {
     Initializes rook lookup table using magic bitboard hashing.
     */
 
-    for (int square = 0; square < 63; square++) {
+    for (int square = 0; square < 64; square++) {
         uint64_t mask = rookRay(square);
         int shift = rookShifts[square];
         uint64_t magic = rookMagics[square];
@@ -592,7 +584,7 @@ void pawnWizard::initBishopTable() {
     Initializes bishop lookup table using magic bitboard hashing.
     */
 
-    for (int square = 0; square < 63; square++) {
+    for (int square = 0; square < 64; square++) {
         uint64_t mask = bishopRay(square);
         int shift = bishopShifts[square];
         uint64_t magic = bishopMagics[square];
@@ -817,7 +809,7 @@ uint64_t pawnWizard::rookMovePseudoLegal(const int fromIndex, const uint64_t occ
     return attacks;
 }
 
-uint64_t pawnWizard::bishopkMovePseudoLegal(const int fromIndex, const uint64_t occupancy) {
+uint64_t pawnWizard::bishopMovePseudoLegal(const int fromIndex, const uint64_t occupancy) {
      /*
     Gets possible attack ray from bishopTable and removes friendly pieces from it.
     :param fromIndex: The bit indexed (0-63) square to move from.
