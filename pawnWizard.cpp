@@ -531,11 +531,61 @@ void pawnWizard::initBishopShifts() {
 }
 
 void pawnWizard::initRookTable() {
+    /*
+    Initializes rook lookup table using magic bitboard hashing.
+    */
 
+    for (int square = 0; square < 63; square++) {
+        uint64_t mask = rookRay(square);
+        int shift = rookShifts[square];
+        uint64_t magic = rookMagics[square];
+
+        // Enumerate over subset of mask (all possible configurations of occupied squares alligning with mask)
+        uint64_t subset = 0;
+
+        do
+        {
+            uint64_t attacks = walkRookRay(square, subset);
+
+            // Compute hashed index to store attack for later loookup
+            int index = (int)((subset * magic) >> shift);
+            rookTable[square][index] = attacks;
+
+            // Ripple carry adder to move to next subset
+            subset = (subset - mask) & mask;
+
+        } while (subset != 0);
+        
+    }
 }
 
 void pawnWizard::initBishopTable() {
+    /*
+    Initializes bishop lookup table using magic bitboard hashing.
+    */
 
+    for (int square = 0; square < 63; square++) {
+        uint64_t mask = bishopRay(square);
+        int shift = bishopShifts[square];
+        uint64_t magic = bishopMagics[square];
+
+        // Enumerate over subset of mask (all possible configurations of occupied squares alligning with mask)
+        uint64_t subset = 0;
+
+        do
+        {
+            uint64_t attacks = walkBishopRay(square, subset);
+
+            // Compute hashed index to store attack for later loookup
+            int index = (int)((subset * magic) >> shift);
+            bishopTable[square][index] = attacks;
+
+            // Ripple carry adder to move to next subset
+            subset = (subset - mask) & mask;
+
+        } while (subset != 0);
+        
+    }
 }
 
 /*
