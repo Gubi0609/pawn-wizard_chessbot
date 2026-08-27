@@ -86,6 +86,7 @@ public:
     uint64_t kingMovePseudoLegal(const int fromIndex);
     uint64_t rookMovePseudoLegal(const int fromIndex, const uint64_t occupancy);
     uint64_t bishopMovePseudoLegal(const int fromIndex, const uint64_t occupancy);
+    uint64_t queenMovePseudoLegal(const int fromIndex, const uint64_t occupancy);
 
 protected:
 

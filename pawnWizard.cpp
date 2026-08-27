@@ -830,3 +830,32 @@ uint64_t pawnWizard::bishopMovePseudoLegal(const int fromIndex, const uint64_t o
 
     return attacks;
 }
+
+uint64_t pawnWizard::queenMovePseudoLegal(const int fromIndex, const uint64_t occupancy) {
+    /*
+    Gets possible attack ray from bishopTable and rookTable and removes friendly pieces from it.
+    :param fromIndex: The bit indexed (0-63) square to move from.
+    :param occupancy: All occupied squares on board.
+    :return: Attack ray with friendly pieces removed.
+    */
+
+    uint64_t maskedBishopOccupancy = getRelevantOccupancy(bishopRays[fromIndex], occupancy);
+    int bishopShift = bishopShifts[fromIndex];
+    int bishopIndex = (int)((maskedBishopOccupancy * bishopMagics[fromIndex]) >> bishopShift);
+    uint64_t bishopAttacks = bishopTable[fromIndex][bishopIndex];
+
+    uint64_t maskedRookOccupancy = getRelevantOccupancy(rookRays[fromIndex], occupancy);
+    int rookShift = rookShifts[fromIndex];
+    int rookIndex = (int)((maskedRookOccupancy * rookMagics[fromIndex]) >> rookShift);
+    uint64_t rookAttacks = rookTable[fromIndex][rookIndex];
+
+    uint64_t attacks = bishopAttacks | rookAttacks;
+
+    uint64_t startPos = 1ULL << fromIndex;
+
+    // Remove friendly pieces from attack options
+    if ((startPos & whiteBishops) != 0) attacks &= ~(whitePieces);
+    else if ((startPos & blackBishops) != 0) attacks &= ~(blackPieces);
+
+    return attacks;
+}
