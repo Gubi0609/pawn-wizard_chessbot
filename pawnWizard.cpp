@@ -1,4 +1,5 @@
 #include "pawnWizard.hpp"
+#include <vector>
 
 pawnWizard::pawnWizard() {
 
@@ -314,6 +315,9 @@ void pawnWizard::movePiece(const int fromIndex, const int toIndex) {
 }
 
 void pawnWizard::resetBoard() {
+    /*
+    Function to reset board and all related variables to default.
+    */
 
     // Reset white piece placement
     uint64_t whitePawns = WHITE_PAWNS_START;
@@ -344,6 +348,140 @@ void pawnWizard::resetBoard() {
 
     bool whiteToMove = true;
 
+    bool whiteInCheck = false;
+    bool whiteinMate = false;
+    bool blackInCheck = false;
+    bool blackInMate = false;
+
+}
+
+uint64_t pawnWizard::getPseudoLegalByIndex(const int fromIndex) {
+
+    char pieceType = getPieceAtSquare(fromIndex);
+    uint64_t occupancy = blackPieces | whitePieces; // All occupied squares (used in sliding piece verification)
+
+    switch (pieceType) {
+        case 'p':
+        case 'P':
+            return pawnMovePseudoLegal(fromIndex);
+        case 'n':
+        case 'N':
+            return knightMovePseudoLegal(fromIndex);
+        case 'b':
+        case 'B':
+           return bishopMovePseudoLegal(fromIndex, occupancy);
+        case 'r':
+        case 'R':
+           return rookMovePseudoLegal(fromIndex, occupancy);
+        case 'q':
+        case 'Q':
+           return queenMovePseudoLegal(fromIndex, occupancy);
+        case 'k':
+        case 'K':
+            return kingMovePseudoLegal(fromIndex);
+        default:
+            break;
+    }
+
+    return 0;
+}
+
+std::vector<int> pawnWizard::getPositionsFromBitboaard(uint64_t bitboard) {
+    /*
+    Function to get the index positions of set bits on a bitboard
+    :param bitboard: The bitboard on which to find the position of all set bits.
+    :return: std::vector containing index positions of set bits as integers.
+    */
+
+    std::vector<int> positions;
+
+    while (bitboard != 0) {                       // stop when no set bits remain
+        int pos = __builtin_ctzll(bitboard);       // step 1: find lowest set bit
+        positions.push_back(pos);                 // step 2: record its position
+        bitboard = bitboard & (bitboard - 1);     // step 3: turn that bit off
+    }
+    return positions;
+
+}
+
+uint64_t pawnWizard::getSlidingMask(const uint64_t slidingPiecesOfSameColor, const uint64_t occupancy){
+    /*
+    Function that gets the collective sliding piece mask for a set of sliding pieces.
+    :param slidingPiecesOfSameColor: The sliding pieces of the same color on which to operate.
+    :param occupancy: All occupied squares on board.
+    :return: Collective sliding mask as bitboard.    
+    */
+
+    std::vector<int> positions = getPositionsFromBitboaard(slidingPiecesOfSameColor);
+
+    uint64_t movementMask = 0;
+
+    for (int i = 0; i < positions.size(); i++) {
+
+        int position = positions[i];
+
+        char piece = getPieceAtSquare(position);
+
+        switch (piece) {
+            case 'r':
+            case 'R':
+                movementMask |= rookMovePseudoLegal(position, occupancy);
+                break;
+            case 'b':
+            case 'B':
+                movementMask |= bishopMovePseudoLegal(position, occupancy);
+                break;
+            case 'q':
+            case 'Q':
+                movementMask |= queenMovePseudoLegal(position, occupancy);
+                break;
+            default:
+                break;
+        }
+    }
+
+    return movementMask;
+
+}
+
+uint64_t pawnWizard::getJumpingMask(const uint64_t jumpingPiecesOfSameColor){
+    /*
+    Function that gets the collective jumping piece mask for a set of jumping pieces.
+    :param jumpingPiecesOfSameColor: The jumping pieces of the same color on which to operate.
+    :return: Collective jumping mask as bitboard.    
+    */
+
+    std::vector<int> positions = getPositionsFromBitboaard(jumpingPiecesOfSameColor);
+
+    uint64_t movementMask = 0;
+
+    for (int i = 0; i < positions.size(); i++) {
+
+        int position = positions[i];
+
+        char piece = getPieceAtSquare(position);
+
+        switch (piece) {
+            case 'p':
+            case 'P':
+                movementMask |= pawnMovePseudoLegal(position);
+                break;
+            case 'n':
+            case 'N':
+                movementMask |= knightMovePseudoLegal(position);
+                break;
+            case 'k':
+            case 'K':
+                movementMask |= kingMovePseudoLegal(position);
+                break;
+            default:
+                break;
+        }
+    }
+
+    return movementMask;
+
+
 }
 
 /*
@@ -354,7 +492,7 @@ uint64_t pawnWizard::rookRay(const int fromIndex) {
     /*
     Generates the rook movement ray on a given square not taking into account blocking pieces.
     :param fromIndex: The bit indexed (0-63) square to move from.
-    :return: uint64_t with a binary value corresponding to the movement ray.
+    :return: uint64_t with a binary value corresponding to the movement ray. Edges still intact
     */
 
     uint64_t startPos = 1ULL << fromIndex;
@@ -369,12 +507,6 @@ uint64_t pawnWizard::rookRay(const int fromIndex) {
     // Remove start position from movementRay
     movementRay &= ~(startPos);
 
-    // Remove edges from movementRay to allign with needs for magic bitboard
-    if ((startPos & ~(A_FILE)) != 0) movementRay &= ~(A_FILE);
-    if ((startPos & ~(H_FILE)) != 0) movementRay &= ~(H_FILE);
-    if ((startPos & ~(ROW_1)) != 0) movementRay &= ~(ROW_1);
-    if ((startPos & ~(ROW_8)) != 0) movementRay &= ~(ROW_8);
-
     return movementRay;
 
 }
@@ -383,7 +515,7 @@ uint64_t pawnWizard::bishopRay(const int fromIndex) {
     /*
     Generates the bishop movement ray on a given square not taking into account blocking pieces.
     :param fromIndex: The bit indexed (0-63) square to move from.
-    :return: uint64_t with a binary value corresponding to the movement ray.
+    :return: uint64_t with a binary value corresponding to the movement ray. Edges still intact
     */
 
     uint64_t startPos = 1ULL << fromIndex;
@@ -420,9 +552,6 @@ uint64_t pawnWizard::bishopRay(const int fromIndex) {
         currentPos <<= 7;
         movementRay |= currentPos;
     }
-
-    // Remove edges from movementRay to allign with needs for magic bitboard
-    movementRay &= ~(A_FILE | H_FILE | ROW_1 | ROW_8);
 
     return movementRay;
 }
@@ -543,13 +672,33 @@ uint64_t pawnWizard::walkBishopRay(const int fromIndex, const uint64_t maskedOcc
     === MAGIC BITBOARDS INIT ===
 */
 
+uint64_t pawnWizard::removeEdge(uint64_t movementRay, const int fromIndex) {
+    /*
+    Removes edges from movementRay to allign with needs for magic bitboard
+    :param movementRay: The raw movmenent ray before edge removal
+    :param fromIndex: The starting index of the relevant piece
+    :return: Modified movementRay with edges removed
+    */
+
+    uint64_t startPos = 1ULL << fromIndex;
+
+    if ((startPos & ~(A_FILE)) != 0) movementRay &= ~(A_FILE);
+    if ((startPos & ~(H_FILE)) != 0) movementRay &= ~(H_FILE);
+    if ((startPos & ~(ROW_1)) != 0) movementRay &= ~(ROW_1);
+    if ((startPos & ~(ROW_8)) != 0) movementRay &= ~(ROW_8);
+
+    return movementRay;
+
+}
+
 void pawnWizard::initRookRays() {
     /*
     Initializes table of rook movement rays for each square
     */
 
     for (int square = 0; square < 64; square++) {
-        rookRays[square] = rookRay(square);
+        rookRaysWithEdge[square] = rookRay(square);
+        rookRays[square] = removeEdge(rookRaysWithEdge[square], square);
     }
 
 }
@@ -560,7 +709,8 @@ void pawnWizard::initBishopRays() {
     */
 
     for (int square = 0; square < 64; square++) {
-        bishopRays[square] = bishopRay(square);
+        bishopRaysWithEdge[square] = bishopRay(square);
+        bishopRays[square] = removeEdge(bishopRaysWithEdge[square], square);
     }
 
 }
@@ -909,4 +1059,137 @@ uint64_t pawnWizard::queenMovePseudoLegal(const int fromIndex, const uint64_t oc
     else if ((startPos & blackBishops) != 0) attacks &= ~(blackPieces);
 
     return attacks;
+}
+
+uint64_t pawnWizard::getLegalMask(const int fromIndex, const uint64_t pseudoLegalMask, const uint64_t enemySlidingPieces, const uint64_t enemyJumpingPieces) {
+
+    uint64_t enemySlidingMoves = getSlidingMask(enemySlidingPieces, whitePieces | blackPieces);
+    uint64_t enemyJumpingMoves = getJumpingMask(enemyJumpingPieces);
+
+    std::vector<int> slidingPositions = getPositionsFromBitboaard(enemySlidingPieces);
+    std::vector<int> jumpingPositions = getPositionsFromBitboaard(enemyJumpingPieces);
+
+
+
+    uint64_t attackingPiecesPosition;
+
+
+    // First check if king is in check
+    if (whiteInCheck) {
+
+        // Are any sliding pieces attacking king
+        if (whiteToMove && (enemySlidingMoves & whiteKing) != 0) {
+
+            // Iteratively check which pieces might be attacking king
+        } 
+        
+        // Are any jumping pieces attacking king
+        if (whiteToMove && (enemyJumpingMoves & whiteKing) != 0) {
+
+            uint64_t currentMovementMask;
+
+            // Iteratively check which pieces might be attacking king
+            for (int i = 0; i < jumpingPositions.size(); i++) {
+
+                currentMovementMask = getPseudoLegalByIndex(jumpingPositions[i]);
+
+                if ((currentMovementMask & whiteKing) != 0) { // If current piece is attack king, add to attackingPiecesPosition
+                    attackingPiecesPosition |= 1ULL << jumpingPositions[i];
+                }
+            }
+        }
+    }
+
+    if (blackInCheck) {
+
+        // Are any sliding pieces attacking king
+        if (!whiteToMove && (enemySlidingMoves & blackKing) != 0) {
+
+            // Iteratively check which pieces might be attacking king
+        }
+        
+        // Are any jumping pieces attacking king
+        if (!whiteToMove && (enemySlidingMoves & blackKing) != 0) {
+
+            uint64_t currentMovementMask;
+
+            // Iteratively check which pieces might be attacking king
+            for (int i = 0; i < jumpingPositions.size(); i++) {
+
+                currentMovementMask = getPseudoLegalByIndex(jumpingPositions[i]);
+
+                if ((currentMovementMask & whiteKing) != 0) { // If current piece is attack king, add to attackingPiecesPosition
+                    attackingPiecesPosition |= 1ULL << jumpingPositions[i];
+                }
+            }
+        }
+    }
+
+    uint64_t enemyRaysBlocked = 0; // Enemy attacking rays with only enemy pieces as blockers
+    uint64_t enemyRaysUnblocked = 0; // Full range enemy rays
+
+    // Get movement rays for pieces and collect in enemyRaysBlocked and Unblocked
+    if (whiteToMove) {
+        for (int i = 0; i < slidingPositions.size(); i++) {
+            char pieceAtPosition = getPieceAtSquare(slidingPositions[i]);
+
+            switch (pieceAtPosition) {
+                case 'r':
+                case 'R':
+                    enemyRaysUnblocked |= rookRaysWithEdge[slidingPositions[i]];
+                    enemyRaysBlocked |= rookMovePseudoLegal(slidingPositions[i], blackPieces);
+
+                case 'b':
+                case 'B':
+                    enemyRaysUnblocked |= bishopRaysWithEdge[slidingPositions[i]];
+                    enemyRaysBlocked |= bishopMovePseudoLegal(slidingPositions[i], blackPieces);
+
+                case 'q':
+                case 'Q':
+                    enemyRaysUnblocked |= rookRaysWithEdge[slidingPositions[i]] | bishopRaysWithEdge[slidingPositions[i]];
+                    enemyRaysBlocked |= queenMovePseudoLegal(slidingPositions[i], blackPieces);
+
+            }
+
+        }
+    } else {
+        for (int i = 0; i < slidingPositions.size(); i++) {
+            char pieceAtPosition = getPieceAtSquare(slidingPositions[i]);
+
+            switch (pieceAtPosition) {
+                case 'r':
+                case 'R':
+                    enemyRaysUnblocked |= rookRaysWithEdge[slidingPositions[i]];
+                    enemyRaysBlocked |= rookMovePseudoLegal(slidingPositions[i], whitePieces);
+
+                case 'b':
+                case 'B':
+                    enemyRaysUnblocked |= bishopRaysWithEdge[slidingPositions[i]];
+                    enemyRaysBlocked |= bishopMovePseudoLegal(slidingPositions[i], whitePieces);
+
+                case 'q':
+                case 'Q':
+                    enemyRaysUnblocked |= rookRaysWithEdge[slidingPositions[i]] | bishopRaysWithEdge[slidingPositions[i]];
+                    enemyRaysBlocked |= queenMovePseudoLegal(slidingPositions[i], whitePieces);
+
+            }
+
+        }
+    }
+
+    // Check if any friendly pieces are pinned
+    if (!whiteInCheck && (whiteKing & enemyRaysBlocked & (whitePieces & ~whiteKing)) != 0) { // If not in check and king along with non-king piece in enemyRaysBlocked
+
+        // Need way to identify pinned pieces. Right now, we only have full movement ray, so we can't differentiate between a piece in line with king
+        // and one not in line with king
+
+    } else if (!blackInCheck && (blackKing & enemyRaysBlocked & (blackPieces & ~ blackKing)) != 0) {
+
+    }
+
+    
+
+
+    
+
 }

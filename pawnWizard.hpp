@@ -6,6 +6,8 @@
 #include <iostream> // For printing bitboard
 #include <stdexcept> // For throwing exceptions
 #include <cstdint> // For 64 bit integers
+#include <vector>
+
 
 // Definition of all files (a - h) as uint64_t
 #define A_FILE 0x0101010101010101ULL
@@ -59,6 +61,10 @@ public:
     void movePieceByType(const char pieceType, const int fromIndex, const int toIndex);
     void movePiece(const int fromIndex, const int toIndex);
     void resetBoard();
+    uint64_t getPseudoLegalByIndex(const int fromIndex);
+    std::vector<int> getPositionsFromBitboaard(uint64_t bitboard);
+    uint64_t getSlidingMask(const uint64_t slidingPiecesOfSameColor, const uint64_t occupancy);
+    uint64_t getJumpingMask(const uint64_t jumpingPiecesOfSameColor);
 
     // Sliding piece functions
     uint64_t rookRay(const int fromIndex);
@@ -68,6 +74,7 @@ public:
     uint64_t walkBishopRay(const int fromIndex, const uint64_t maskedOccupancy);
 
     // Magic Bitboard init
+    uint64_t removeEdge(uint64_t movementRay, const int fromIndex);
     void initRookRays();
     void initBishopRays();
     void initRookShifts();
@@ -88,6 +95,9 @@ public:
     uint64_t rookMovePseudoLegal(const int fromIndex, const uint64_t occupancy);
     uint64_t bishopMovePseudoLegal(const int fromIndex, const uint64_t occupancy);
     uint64_t queenMovePseudoLegal(const int fromIndex, const uint64_t occupancy);
+
+    uint64_t getLegalMask(const int fromIndex, const uint64_t pseudoLegalMask, const uint64_t enemySlidingPieces, const uint64_t enemyJumpingPieces);
+
 
 protected:
 
@@ -120,6 +130,11 @@ protected:
 
     bool whiteToMove = true;
 
+    bool whiteInCheck = false;
+    bool whiteinMate = false;
+    bool blackInCheck = false;
+    bool blackInMate = false;
+
     // Lookup tables for jumping pieces
     uint64_t knightLookupTable[64];
     uint64_t kingLookupTable[64];
@@ -127,6 +142,10 @@ protected:
     /* Used for magic bitboard generation */
     uint64_t rookRays[64];
     uint64_t bishopRays[64];
+
+    uint64_t rookRaysWithEdge[64];
+    uint64_t bishopRaysWithEdge[64];
+    
 
     uint64_t rookTable[64][4096];
     uint64_t bishopTable[64][512];
