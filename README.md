@@ -3,7 +3,10 @@
 A chessbot programmed in C++.
 
 ## TODO
-
+- Finish implementation on getLegalMask. Need to identify pinned pieces and also use the recognized attacking pieces to isolate allowed moves.
+- Implement getPseudoLegaByIndex in functions otherwise using switchcase
+- Evaluate if rookRaysWithEdges and bishopRaysWithEdges are even necessary. Might not be needed.
+    - Only idea right now is to use it in getLegalMask. Will need to finish function to evaluate
 
 ## Build
 
