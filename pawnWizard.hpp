@@ -58,6 +58,7 @@ public:
     std::string index2uci(const int index);
     void movePieceByType(const char pieceType, const int fromIndex, const int toIndex);
     void movePiece(const int fromIndex, const int toIndex);
+    void resetBoard();
 
     // Sliding piece functions
     uint64_t rookRay(const int fromIndex);
@@ -108,20 +109,20 @@ protected:
     uint64_t blackQueens = BLACK_QUEEN_START;
     uint64_t blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
 
-    // Lookup tables for jumping pieces
-    uint64_t knightLookupTable[64];
-    uint64_t kingLookupTable[64];
-
     // Bitboard updated every move to keep track of possible en passant moves
     uint64_t enPassant = 0x0000000000000000;
 
-    // Biboards to keep track of possible castle for each color
+    // Bitboards to keep track of possible castle for each color
     bool whiteCastleWest = true;
     bool whiteCastleEast = true;
     bool blackCastleWest = true;
     bool blackCastleEast = true;
 
     bool whiteToMove = true;
+
+    // Lookup tables for jumping pieces
+    uint64_t knightLookupTable[64];
+    uint64_t kingLookupTable[64];
 
     /* Used for magic bitboard generation */
     uint64_t rookRays[64];

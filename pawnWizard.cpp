@@ -181,6 +181,7 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
     }
 
     uint64_t movementMask = 0;
+    uint64_t occupancy = blackPieces | whitePieces; // All occupied squares (used in sliding piece verification)
 
     switch (pieceType) {
         case 'p':
@@ -191,18 +192,18 @@ void pawnWizard::movePieceByType(const char pieceType, const int fromIndex, cons
         case 'N':
             movementMask = knightMovePseudoLegal(fromIndex);
             break;
-        // case 'b':
-        // case 'B':
-        //    movementMask = bishopMovePseudoLegal(fromIndex);
-        //    break;
-        // case 'r':
-        // case 'R':
-        //    movementMask = rookMovePseudoLegal(fromIndex);
-        //    break;
-        // case 'q':
-        // case 'Q':
-        //    movementMask = queenMovePseudoLegal(fromIndex);
-        //    break;
+        case 'b':
+        case 'B':
+           movementMask = bishopMovePseudoLegal(fromIndex, occupancy);
+           break;
+        case 'r':
+        case 'R':
+           movementMask = rookMovePseudoLegal(fromIndex, occupancy);
+           break;
+        case 'q':
+        case 'Q':
+           movementMask = queenMovePseudoLegal(fromIndex, occupancy);
+           break;
         case 'k':
         case 'K':
             movementMask = kingMovePseudoLegal(fromIndex);
@@ -310,6 +311,39 @@ void pawnWizard::movePiece(const int fromIndex, const int toIndex) {
     }
 
     movePieceByType(pieceType, fromIndex, toIndex);
+}
+
+void pawnWizard::resetBoard() {
+
+    // Reset white piece placement
+    uint64_t whitePawns = WHITE_PAWNS_START;
+    uint64_t whiteRooks = WHITE_ROOKS_START;
+    uint64_t whiteKnights = WHITE_KNIGHTS_START;
+    uint64_t whiteBishops = WHITE_BISHOPS_START;
+    uint64_t whiteKing = WHITE_KING_START;
+    uint64_t whiteQueens = WHITE_QUEENS_START;
+    uint64_t whitePieces = whitePawns | whiteRooks | whiteKnights | whiteBishops | whiteKing | whiteQueens;
+
+    // Reset black piece placement
+    uint64_t blackPawns = BLACK_PAWNS_START;
+    uint64_t blackRooks = BLACK_ROOKS_START;
+    uint64_t blackKnights = BLACK_KNIGHTS_START;
+    uint64_t blackBishops = BLACK_BISHOPS_START;
+    uint64_t blackKing = BLACK_KING_START;
+    uint64_t blackQueens = BLACK_QUEEN_START;
+    uint64_t blackPieces = blackPawns | blackRooks | blackKnights | blackBishops | blackKing | blackQueens;
+
+    // Reset en passant moves
+    uint64_t enPassant = 0x0000000000000000;
+
+    // Reset bitboards to keep track of possible castle for each color
+    bool whiteCastleWest = true;
+    bool whiteCastleEast = true;
+    bool blackCastleWest = true;
+    bool blackCastleEast = true;
+
+    bool whiteToMove = true;
+
 }
 
 /*
