@@ -55,18 +55,35 @@ uint64_t& pawnWizard::getBitboardByType(const char pieceType) {
     :return: The 64-bit bitboard representation of the pieces' of pieceType placement.
     */
 
-    if (pieceType == 'p') return blackPawns;
-    else if (pieceType == 'r') return blackRooks;
-    else if (pieceType == 'n') return blackKnights;
-    else if (pieceType == 'b') return blackBishops;
-    else if (pieceType == 'q') return blackQueens;
-    else if (pieceType == 'k') return blackKing;
-    else if (pieceType == 'P') return whitePawns;
-    else if (pieceType == 'R') return whiteRooks;
-    else if (pieceType == 'N') return whiteKnights;
-    else if (pieceType == 'B') return whiteBishops;
-    else if (pieceType == 'Q') return whiteQueens;
-    else if (pieceType == 'K') return whiteKing;
+    switch (pieceType) {
+    
+        case 'p':
+            return blackPawns;
+        case 'r':
+            return blackRooks;
+        case 'n':
+            return blackKnights;
+        case 'b':
+            return blackBishops;
+        case 'q':
+            return blackQueens;
+        case 'k':
+            return blackKing;
+
+        case 'P':
+            return whitePawns;
+        case 'R':
+            return whiteRooks;
+        case 'N':
+            return whiteKnights;
+        case 'B':
+            return whiteBishops;
+        case 'Q':
+            return whiteQueens;
+        case 'K':
+            return whiteKing;
+
+    }
     
     throw std::invalid_argument("Not a valid pieceType.");
 
